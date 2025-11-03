@@ -1,8 +1,5 @@
 ﻿/*
-Animación:
-Simple o básica:Por banderas y condicionales (más de 1 transformación geométrica se ve modificada)
-Compleja: Por medio de funciones y algoritmos.
-Textura Animada
+PROYECTO FINAL
 */
 //para cargar imagen
 #define STB_IMAGE_IMPLEMENTATION
@@ -417,3 +414,4 @@ int main()
 
 	return 0;
 }
+
