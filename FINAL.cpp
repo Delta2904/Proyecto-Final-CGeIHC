@@ -1,5 +1,6 @@
-﻿/*
+/*
 PROYECTO FINAL
+Limite del Mapa 197 en Z
 */
 //para cargar imagen
 #define STB_IMAGE_IMPLEMENTATION
@@ -69,9 +70,9 @@ Texture pisoTexture;
 Skybox skybox;
 
 Model Kiosko;
+Model Fuente;
 Model Letrero;
-Model PuertaI;
-Model PuertaD;
+Model Lampara;
 
 //materiales
 Material Material_brillante;
@@ -267,6 +268,7 @@ int main()
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
 
+	// TEXTURAS
 	brickTexture = Texture("Textures/brick.png");
 	brickTexture.LoadTextureA();
 	dirtTexture = Texture("Textures/dirt.png");
@@ -276,8 +278,13 @@ int main()
 	pisoTexture = Texture("Textures/Piso.png");
 	pisoTexture.LoadTextureA();
 
+	// MODELOS
 	Kiosko = Model();
 	Kiosko.LoadModel("Models/Kiosko.obj");
+	Fuente = Model();
+	Fuente.LoadModel("Models/Fuente.obj");
+	Lampara = Model();
+	Lampara.LoadModel("Models/Lampara.fbx");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
@@ -401,11 +408,31 @@ int main()
 
 		meshList[2]->RenderMesh();
 
+		// Kiosko
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Kiosko.RenderModel();
+
+		// Fuente
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(230.0f, -2.0f, -25.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Fuente.RenderModel();
+
+		// Lampara
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(65.0f, 7.6f, 80.0));
+		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
+		model = glm::rotate(model, -90 * toRadians, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Lampara.RenderModel();
 
 		glUseProgram(0);
 
@@ -414,4 +441,3 @@ int main()
 
 	return 0;
 }
-
