@@ -73,6 +73,9 @@ Model Kiosko;
 Model Fuente;
 Model Letrero;
 Model Lampara;
+Model Ring;
+Model Hom;
+Model ChichenItza;
 
 //materiales
 Material Material_brillante;
@@ -285,6 +288,12 @@ int main()
 	Fuente.LoadModel("Models/Fuente.obj");
 	Lampara = Model();
 	Lampara.LoadModel("Models/Lampara.fbx");
+	Ring = Model();
+	Ring.LoadModel("Models/Ring.obj");
+	Hom = Model();
+	Hom.LoadModel("Models/Hom.obj");
+	ChichenItza = Model();
+	ChichenItza.LoadModel("Models/ChichenItza.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
@@ -423,6 +432,30 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fuente.RenderModel();
+
+		// Ring
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-200.0f, -2.0f, -100.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Ring.RenderModel();
+
+		// Escultura
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(0.0f, -2.0f, -80.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Hom.RenderModel();
+
+		// Chichen Itza
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-200.0f, -2.0f, 100.0));
+		model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		ChichenItza.RenderModel();
 
 		// Lampara
 
