@@ -29,6 +29,16 @@ Limite del Mapa 197 en Z
 #include"Model.h"
 #include "Skybox.h"
 
+//animacion keyframes
+
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+const string nombreArchivo = "KEYFRAMES_FINAL.txt";
+bool archivoExiste = false;
+
 //para iluminación
 #include "CommonValues.h"
 #include "DirectionalLight.h"
@@ -56,6 +66,9 @@ float angulovaria = 0.0f;
 float dragonavance = 0.0f;
 float rotaciondragon = 0.0f;
 
+//variables para keyframes
+float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo, ciclo2, contador = 0;
+
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
@@ -78,6 +91,7 @@ Model Hom;
 Model ChichenItza;
 Model Arbusto;
 Model Pasto;
+Model FantasticCar; // keyframes
 
 //materiales
 Material Material_brillante;
@@ -102,6 +116,9 @@ static const char* vShader = "shaders/shader_light.vert";
 
 // Fragment Shader
 static const char* fShader = "shaders/shader_light.frag";
+
+//función para teclado de keyframes 
+void inputKeyframes(bool* keys);
 
 //cálculo del promedio de las normales para sombreado de Phong
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
@@ -262,6 +279,130 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
+///////////////////////////////KEYFRAMES/////////////////////
+
+
+bool animacion = false;
+
+
+
+//NEW// Keyframes
+float posX4 = -100.0, posY4 = -2.0, posZ4 = -100.0;
+float	movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0f;
+float giroAvion = 0;
+
+#define MAX_FRAMES 100 //Número de cuadros máximos
+int i_max_steps = 100; //Número de pasos entre cuadros para interpolación, a mayor número , más lento será el movimiento
+int i_curr_steps = 0;
+typedef struct _frame
+{
+	//Variables para GUARDAR Key Frames
+	float movAvion_x;		//Variable para PosicionX
+	float movAvion_y;		//Variable para PosicionY
+	float movAvion_z;		//Variable para PosicionZ
+	float movAvion_xInc;		//Variable para IncrementoX
+	float movAvion_yInc;		//Variable para IncrementoY
+	float movAvion_zInc;		//Variable para IncrementoZ
+	float giroAvion;		//Variable para GiroAvion
+	float giroAvionInc;		//Variable para IncrementoGiroAvion
+}FRAME;
+
+FRAME KeyFrame[MAX_FRAMES];
+int FrameIndex = 0;			//El número de cuadros guardados actualmente desde 0 para no sobreescribir
+bool play = false;
+int playIndex = 0;
+
+void saveFrame(void) //tecla L
+{
+
+	printf("frameindex %d\n", FrameIndex);
+
+
+	KeyFrame[FrameIndex].movAvion_x = movAvion_x;
+	KeyFrame[FrameIndex].movAvion_y = movAvion_y;
+	KeyFrame[FrameIndex].movAvion_z = movAvion_z;
+	KeyFrame[FrameIndex].giroAvion = giroAvion;
+	//Se agregan nuevas líneas para guardar más variables si es necesario
+
+	// Crea el archivo si no existe
+	ofstream archivo(nombreArchivo, ios::app); // modo append
+
+	if (!archivo) {
+		cerr << "Error al crear el archivo.\n";
+	}
+	else {
+		archivo << "KeyFrame: [" << FrameIndex << "] Movimiento del Fantasticar en x: " << movAvion_x << "\n";
+		archivo << "KeyFrame: [" << FrameIndex << "] Movimiento del Fantasticar en y: " << movAvion_y << "\n";
+		archivo << "KeyFrame: [" << FrameIndex << "] Movimiento del Fantasticar en z: " << movAvion_z << "\n";
+		archivo << "KeyFrame: [" << FrameIndex << "] Giro del Fantasticar: " << giroAvion << "\n";
+
+		archivo.close();
+		cout << "Datos añadidos correctamente.\n";
+	}
+
+
+
+	//no volatil,se requiere agregar una forma de escribir a un archivo para guardar los frames
+	FrameIndex++;
+}
+
+void resetElements(void) //Tecla 0
+{
+
+	movAvion_x = KeyFrame[0].movAvion_x;
+	movAvion_y = KeyFrame[0].movAvion_y;
+	movAvion_z = KeyFrame[0].movAvion_z;
+	giroAvion = KeyFrame[0].giroAvion;
+}
+
+void interpolation(void)
+{
+	KeyFrame[playIndex].movAvion_xInc = (KeyFrame[playIndex + 1].movAvion_x - KeyFrame[playIndex].movAvion_x) / i_max_steps;
+	KeyFrame[playIndex].movAvion_yInc = (KeyFrame[playIndex + 1].movAvion_y - KeyFrame[playIndex].movAvion_y) / i_max_steps;
+	KeyFrame[playIndex].movAvion_zInc = (KeyFrame[playIndex + 1].movAvion_z - KeyFrame[playIndex].movAvion_z) / i_max_steps;
+	KeyFrame[playIndex].giroAvionInc = (KeyFrame[playIndex + 1].giroAvion - KeyFrame[playIndex].giroAvion) / i_max_steps;
+
+}
+
+
+void animate(void)
+{
+	//Movimiento del objeto con barra espaciadora
+	if (play)
+	{
+		if (i_curr_steps >= i_max_steps) //fin de animación entre frames?
+		{
+			playIndex++;
+			printf("playindex : %d\n", playIndex);
+			if (playIndex > FrameIndex - 2)	//Fin de toda la animación con último frame?
+			{
+				printf("Frame index= %d\n", FrameIndex);
+				printf("termino la animacion\n");
+				playIndex = 0;
+				play = false;
+			}
+			else //Interpolación del próximo cuadro
+			{
+
+				i_curr_steps = 0; //Resetea contador
+				//Interpolar
+				interpolation();
+			}
+		}
+		else
+		{
+			//Dibujar Animación
+			movAvion_x += KeyFrame[playIndex].movAvion_xInc;
+			movAvion_y += KeyFrame[playIndex].movAvion_yInc;
+			movAvion_z += KeyFrame[playIndex].movAvion_zInc;
+			giroAvion += KeyFrame[playIndex].giroAvionInc;
+			i_curr_steps++;
+		}
+
+	}
+}
+
+///////////////* FIN KEYFRAMES*////////////////////////////
 
 int main()
 {
@@ -300,6 +441,8 @@ int main()
 	Arbusto.LoadModel("Models/Arbusto.obj");
 	Pasto = Model();
 	Pasto.LoadModel("Models/Pasto.obj");
+	FantasticCar = Model();
+	FantasticCar.LoadModel("Models/FANTASTICAR.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
@@ -345,17 +488,33 @@ int main()
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 
 	movCoche = 0.0f;
-	movOffset = 0.9f;
+	movOffset = 0.0f;
 	rotllanta = 0.0f;
 	rotllantaOffset = 10.0f;
-
-	glm::vec3 lowerLight(0.0f, 0.0f, 0.0f);
+	glm::vec3 pos4 = glm::vec3(0.0f, 10.0f, 0.0f);
+	
+	//---------PARA TENER KEYFRAMES GUARDADOS NO VOLATILES QUE SIEMPRE SE UTILIZARAN SE DECLARAN AQUÍ
+	
+	KeyFrame[0].movAvion_x = 0.0f;
+	KeyFrame[0].movAvion_y = 0.0f;
+	KeyFrame[0].movAvion_z = 0.0f;
+	KeyFrame[0].giroAvion = 90.0;
+	
+	ifstream verificador(nombreArchivo);
+	archivoExiste = verificador.good();
+	verificador.close();
+	
+	printf("\nTeclas para uso de Keyframes:\n1.-Presionar barra espaciadora para reproducir animacion.\n2.-Presionar 0 para volver a habilitar reproduccion de la animacion\n");
+	printf("3.-Presiona L para guardar frame\n4.-Presiona P para habilitar guardar nuevo frame\n5.-Presiona 1 para mover en X\n6.-Presiona 2 para habilitar moverse");
+	printf("\n7.-Presiona 3 para mover en -X\n8.-Presiona 4 para mover en Y\n9.-Presiona 5 para habilitar moverse en Y\n10.-Presiona 6 para mover en -Y\n11.-Presiona 7 para mover Z");
+	printf("\n12.-Presiona 8 para habilitar moverse en Z y girar\n13.-Presiona 9 para mover -Z\n14.-Presiona 0 para girar");
 
 	glm::mat4 model(1.0);
 	glm::mat4 modelaux(1.0);
 	glm::mat4 modelaux2(1.0);
 	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
+	glm::vec3 lowerLight = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -373,6 +532,10 @@ int main()
 		glfwPollEvents();
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+
+		//-------Para Keyframes
+		inputKeyframes(mainWindow.getsKeys());
+		animate();
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -571,6 +734,19 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
 
+				// ANIMACIÓN POR KEYFRAMES
+
+		model = glm::mat4(1.0);
+		pos4 = glm::vec3(posX4 + movAvion_x, posY4 + movAvion_y, posZ4 + movAvion_z);
+		model = glm::translate(model, pos4);
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		model = glm::rotate(model, giroAvion * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
+		//color = glm::vec3(0.0f, 1.0f, 0.0f);
+		//glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		FantasticCar.RenderModel();
+
+
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
@@ -578,4 +754,196 @@ int main()
 
 	return 0;
 }
+
+void inputKeyframes(bool* keys)
+{
+	if (keys[GLFW_KEY_SPACE])
+	{
+		if (reproduciranimacion < 1)
+		{
+			if (play == false && (FrameIndex > 1))
+			{
+				resetElements();
+				//First Interpolation				
+				interpolation();
+				play = true;
+				playIndex = 0;
+				i_curr_steps = 0;
+				reproduciranimacion++;
+				printf("\n presiona 0 para habilitar reproducir de nuevo la animación'\n");
+				habilitaranimacion = 0;
+
+			}
+			else
+			{
+				play = false;
+
+			}
+		}
+	}
+	if (keys[GLFW_KEY_0])
+	{
+		if (habilitaranimacion < 1 && reproduciranimacion>0)
+		{
+			printf("Ya puedes reproducir de nuevo la animación con la tecla de barra espaciadora'\n");
+			reproduciranimacion = 0;
+
+		}
+	}
+
+	if (keys[GLFW_KEY_L])
+	{
+		if (guardoFrame < 1)
+		{
+			saveFrame();
+			printf("movAvion_x es: %f\n", movAvion_x);
+			printf("movAvion_y es: %f\n", movAvion_y);
+			printf("presiona P para habilitar guardar otro frame'\n");
+			guardoFrame++;
+			reinicioFrame = 0;
+		}
+	}
+	if (keys[GLFW_KEY_P])
+	{
+		if (reinicioFrame < 1)
+		{
+			guardoFrame = 0;
+			printf("Ya puedes guardar otro frame presionando la tecla L'\n");
+			reinicioFrame++;
+		}
+	}
+
+
+	if (keys[GLFW_KEY_1])
+	{
+		if (ciclo < 1)
+		{
+			//printf("movAvion_x es: %f\n", movAvion_x);
+			movAvion_x += 100.0f;
+			printf("\n movAvion_x es: %f\n", movAvion_x);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+		}
+
+	}
+	if (keys[GLFW_KEY_2])
+	{
+		if (ciclo2 < 1)
+		{
+			ciclo = 0;
+			ciclo2++;
+			printf("\n Ya puedes modificar tu variable presionando la tecla 1\n");
+		}
+	}
+	if (keys[GLFW_KEY_3])
+	{
+		if (ciclo < 1)
+		{
+			//printf("movAvion_x es: %f\n", movAvion_x);
+			movAvion_x -= 25.0f;
+			printf("\n movAvion_-x es: %f\n", movAvion_x);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
+		}
+
+	}
+
+	if (keys[GLFW_KEY_4])
+	{
+		if (ciclo < 1)
+		{
+			//printf("movAvion_x es: %f\n", movAvion_x);
+			movAvion_y += 25.0f;
+			printf("\n movAvion_y es: %f\n", movAvion_y);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 5 para poder habilitar la variable\n");
+		}
+
+	}
+
+	if (keys[GLFW_KEY_5])
+	{
+		if (ciclo2 < 1)
+		{
+			ciclo = 0;
+			ciclo2++;
+			printf("\n Ya puedes modificar tu variable presionando la tecla 4\n");
+		}
+	}
+
+	if (keys[GLFW_KEY_6])
+	{
+		if (ciclo < 1)
+		{
+			//printf("movAvion_x es: %f\n", movAvion_x);
+			movAvion_y -= 50.0f;
+			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 5 para poder habilitar la variable\n");
+		}
+
+	}
+
+	if (keys[GLFW_KEY_7])
+	{
+		if (ciclo < 1)
+		{
+			//printf("movAvion_x es: %f\n", movAvion_x);
+			movAvion_z += 50.0f;
+			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 85 para poder habilitar la variable\n");
+		}
+
+	}
+
+	if (keys[GLFW_KEY_8])
+	{
+		if (ciclo2 < 1)
+		{
+			ciclo = 0;
+			ciclo2++;
+			printf("\n Ya puedes modificar tu variable presionando la tecla 7 o 9\n");
+		}
+	}
+
+	if (keys[GLFW_KEY_9])
+	{
+		if (ciclo < 1)
+		{
+			//printf("movAvion_x es: %f\n", movAvion_x);
+			movAvion_z -= 50.0f;
+			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
+		}
+
+	}
+
+
+	if (keys[GLFW_KEY_0])
+	{
+		if (ciclo < 1)
+		{
+			if (giroAvion >= 360) {
+				giroAvion -= 90.0f;
+			}
+			else {
+				giroAvion += 90.0f;
+			}
+			printf("\n El ángulo del helicoptero es: %f\n", giroAvion);
+			ciclo++;
+			ciclo2 = 0;
+			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
+		}
+
+	}
+}
+
 
