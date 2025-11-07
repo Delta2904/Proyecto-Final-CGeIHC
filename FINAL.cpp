@@ -412,7 +412,13 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
+	Camera camera(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0, 1, 0), -90.0f, 0.0f, 6.0f, 0.1f);
+	glm::vec3 avatar = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera.setAvatarPointer(&avatar);
+
+	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Kiosko
+	camera.addPointOfInterest(glm::vec3(130.0f, 70.0f, 25.0f), glm::vec3(230.0f, 0.0f, 9.0f)); // Fuente
+
 
 	// TEXTURAS
 	brickTexture = Texture("Textures/brick.png");
@@ -492,18 +498,18 @@ int main()
 	rotllanta = 0.0f;
 	rotllantaOffset = 10.0f;
 	glm::vec3 pos4 = glm::vec3(0.0f, 10.0f, 0.0f);
-	
+
 	//---------PARA TENER KEYFRAMES GUARDADOS NO VOLATILES QUE SIEMPRE SE UTILIZARAN SE DECLARAN AQUÍ
-	
+
 	KeyFrame[0].movAvion_x = 0.0f;
 	KeyFrame[0].movAvion_y = 0.0f;
 	KeyFrame[0].movAvion_z = 0.0f;
 	KeyFrame[0].giroAvion = 90.0;
-	
+
 	ifstream verificador(nombreArchivo);
 	archivoExiste = verificador.good();
 	verificador.close();
-	
+
 	printf("\nTeclas para uso de Keyframes:\n1.-Presionar barra espaciadora para reproducir animacion.\n2.-Presionar 0 para volver a habilitar reproduccion de la animacion\n");
 	printf("3.-Presiona L para guardar frame\n4.-Presiona P para habilitar guardar nuevo frame\n5.-Presiona 1 para mover en X\n6.-Presiona 2 para habilitar moverse");
 	printf("\n7.-Presiona 3 para mover en -X\n8.-Presiona 4 para mover en Y\n9.-Presiona 5 para habilitar moverse en Y\n10.-Presiona 6 para mover en -Y\n11.-Presiona 7 para mover Z");
@@ -515,6 +521,7 @@ int main()
 	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
 	glm::vec3 lowerLight = glm::vec3(0.0f, 0.0f, 0.0f);
+	bool cPressed = false, qPressed = false, ePressed = false;
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -526,12 +533,31 @@ int main()
 
 		angulovaria += 0.5f * deltaTime;
 
-
-
 		//Recibir eventos del usuario
 		glfwPollEvents();
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+
+		if (mainWindow.getsKeys()[GLFW_KEY_C]) {
+			if (!cPressed) { camera.cycleMode(); cPressed = true; std::cout << "Mode: " << (int)camera.getMode() << std::endl; }
+		}
+		else cPressed = false;
+
+		if (mainWindow.getsKeys()[GLFW_KEY_Q]) {
+			if (!qPressed) { camera.previousPOI(); qPressed = true; std::cout << "PuntoInteres: " << camera.getCurrentPOIIndex() << std::endl; }
+		}
+		else qPressed = false;
+
+		if (mainWindow.getsKeys()[GLFW_KEY_E]) {
+			if (!ePressed) { camera.nextPOI(); ePressed = true; std::cout << "PuntoInteres: " << camera.getCurrentPOIIndex() << std::endl; }
+		}
+		else ePressed = false;
+
+		camera.Update(deltaTime);
+
+		// calcular view y render:
+		glm::mat4 view = camera.calculateViewMatrix();
 
 		//-------Para Keyframes
 		inputKeyframes(mainWindow.getsKeys());
@@ -633,9 +659,9 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Pasto.RenderModel();
-		
+
 		// Lamparas
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(50.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -643,7 +669,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(50.0f, 7.6f, -20.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -651,7 +677,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(270.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -659,7 +685,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(270.0f, 7.6f, -20.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -667,9 +693,9 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		// MAPA IZQUIERDA
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-50.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -677,7 +703,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-50.0f, 7.6f, -13.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -685,7 +711,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-270.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -693,7 +719,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-270.0f, 7.6f, -13.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -701,7 +727,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, 7.6f, 180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -709,7 +735,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-20.0f, 7.6f, 180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -717,7 +743,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, 7.6f, -180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -725,7 +751,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-20.0f, 7.6f, -180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -734,7 +760,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
 
-				// ANIMACIÓN POR KEYFRAMES
+		// ANIMACIÓN POR KEYFRAMES
 
 		model = glm::mat4(1.0);
 		pos4 = glm::vec3(posX4 + movAvion_x, posY4 + movAvion_y, posZ4 + movAvion_z);
@@ -745,7 +771,6 @@ int main()
 		//glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		FantasticCar.RenderModel();
-
 
 		glUseProgram(0);
 
@@ -798,6 +823,7 @@ void inputKeyframes(bool* keys)
 			saveFrame();
 			printf("movAvion_x es: %f\n", movAvion_x);
 			printf("movAvion_y es: %f\n", movAvion_y);
+			printf("movAvion_z es: %f\n", movAvion_z);
 			printf("presiona P para habilitar guardar otro frame'\n");
 			guardoFrame++;
 			reinicioFrame = 0;
@@ -819,7 +845,7 @@ void inputKeyframes(bool* keys)
 		if (ciclo < 1)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			movAvion_x += 100.0f;
+			movAvion_x += 50.0f;
 			printf("\n movAvion_x es: %f\n", movAvion_x);
 			ciclo++;
 			ciclo2 = 0;
@@ -841,8 +867,8 @@ void inputKeyframes(bool* keys)
 		if (ciclo < 1)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			movAvion_x -= 25.0f;
-			printf("\n movAvion_-x es: %f\n", movAvion_x);
+			movAvion_x -= 50.0f;
+			printf("\n movAvion_x es: %f\n", movAvion_x);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
@@ -855,7 +881,7 @@ void inputKeyframes(bool* keys)
 		if (ciclo < 1)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			movAvion_y += 25.0f;
+			movAvion_y += 50.0f;
 			printf("\n movAvion_y es: %f\n", movAvion_y);
 			ciclo++;
 			ciclo2 = 0;
@@ -880,7 +906,7 @@ void inputKeyframes(bool* keys)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
 			movAvion_y -= 50.0f;
-			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			printf("\n movAvion_y es: %f\n", movAvion_y);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 5 para poder habilitar la variable\n");
@@ -894,10 +920,10 @@ void inputKeyframes(bool* keys)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
 			movAvion_z += 50.0f;
-			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			printf("\n movAvion_z es: %f\n", movAvion_z);
 			ciclo++;
 			ciclo2 = 0;
-			printf("\n Presiona la tecla 85 para poder habilitar la variable\n");
+			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
 		}
 
 	}
@@ -908,7 +934,7 @@ void inputKeyframes(bool* keys)
 		{
 			ciclo = 0;
 			ciclo2++;
-			printf("\n Ya puedes modificar tu variable presionando la tecla 7 o 9\n");
+			printf("\n Ya puedes modificar tu variable presionando la tecla 7, 9 o 0\n");
 		}
 	}
 
@@ -918,7 +944,7 @@ void inputKeyframes(bool* keys)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
 			movAvion_z -= 50.0f;
-			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			printf("\n movAvion_z es: %f\n", movAvion_z);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
@@ -944,6 +970,14 @@ void inputKeyframes(bool* keys)
 		}
 
 	}
+
+	camera.keyControl(keys, deltaTime);
+
+	if (keys[GLFW_KEY_C]) 
+	{
+		camera.cycleMode();
+	}
+	// cambiar punto de vista con Q/E
+	if (keys[GLFW_KEY_Q]) camera.previousPOI();
+	if (keys[GLFW_KEY_E]) camera.nextPOI();
 }
-
-
