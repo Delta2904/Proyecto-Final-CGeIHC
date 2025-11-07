@@ -4,6 +4,9 @@
 # No ignorar el propio archivo .gitignore
 !.gitignore
 
+# No ignorar el README.md
+!README.md
+
 # No ignorar el main
 !FINAL.cpp
 
