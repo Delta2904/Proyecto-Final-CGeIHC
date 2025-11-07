@@ -1,0 +1,19 @@
+# Ignorar todos los archivos
+*
+
+# No ignorar el propio archivo .gitignore
+!.gitignore
+
+# No ignorar el main
+!FINAL.cpp
+
+# No ignorar Camera.h y Camera.cpp
+!Camera.*
+
+# No ignorar la carpeta de texturas ni su contenido
+!Textures/
+!Textures/**
+
+# No ignorar la carpeta de modelos ni su contenido
+!Models/
+!Models/**

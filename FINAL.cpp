@@ -66,6 +66,13 @@ float angulovaria = 0.0f;
 float dragonavance = 0.0f;
 float rotaciondragon = 0.0f;
 
+// Variables para animación del ring
+float ringPosY = -20.0f;          // Posición Y inicial
+const float ringTargetY = -2.0f;  // Posición Y final
+bool animacionRingInicia = false; // Bandera para saber si debe animarse
+float ringRotY = 0.0f;            // Ángulo de rotación inicial en Y
+
+
 //variables para keyframes
 float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo, ciclo2, contador = 0;
 
@@ -559,9 +566,36 @@ int main()
 		// calcular view y render:
 		glm::mat4 view = camera.calculateViewMatrix();
 
+		// Bandera para animación del ring
+		if (mainWindow.getsKeys()[GLFW_KEY_R])
+		{
+			animacionRingInicia = true;
+			ringPosY = -20.0f; // Reinicia la posición
+			ringRotY = 0.0f;   // Reinicia la rotación
+		}
+
 		//-------Para Keyframes
 		inputKeyframes(mainWindow.getsKeys());
 		animate();
+
+		// *** LÓGICA DE ANIMACIÓN DEL RING ***
+		if (animacionRingInicia)
+		{
+			// Si el ring todavía no llega a su destino
+			if (ringPosY < ringTargetY)
+			{
+				// Moverlo hacia arriba, basado en la velocidad y el deltaTime
+				ringPosY += 0.05f * deltaTime;
+				// Hacer que gire mientras sube
+				ringRotY += 0.05f * deltaTime;
+			}
+			else
+			{
+				// Si ya llegó (o se pasó), clavarlo en la posición final
+				ringPosY = ringTargetY;
+				ringRotY = 0.0f; // Detener la rotación
+			}
+		}
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -631,7 +665,8 @@ int main()
 		// Ring
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-200.0f, -2.0f, -100.0));
+		model = glm::translate(model, glm::vec3(-200.0f, ringPosY, -100.0));
+		model = glm::rotate(model, ringRotY, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Ring.RenderModel();
@@ -973,7 +1008,7 @@ void inputKeyframes(bool* keys)
 
 	camera.keyControl(keys, deltaTime);
 
-	if (keys[GLFW_KEY_C]) 
+	if (keys[GLFW_KEY_C])
 	{
 		camera.cycleMode();
 	}
