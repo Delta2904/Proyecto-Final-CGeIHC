@@ -7,6 +7,9 @@
 # No ignorar el main
 !FINAL.cpp
 
+# No ignorar Camera.h y Camera.cpp
+!Camera.*
+
 # No ignorar la carpeta de texturas ni su contenido
 !Textures/
 !Textures/**

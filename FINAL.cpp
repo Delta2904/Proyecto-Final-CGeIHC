@@ -45,7 +45,7 @@ bool archivoExiste = false;
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Material.h"
-
+#include "practica9full.h"
 const float toRadians = 3.14159265f / 180.0f;
 
 //variables para animación
@@ -65,12 +65,6 @@ float toffsetnumerocambiau = 0.0;
 float angulovaria = 0.0f;
 float dragonavance = 0.0f;
 float rotaciondragon = 0.0f;
-
-// Variables para animación del ring
-float ringPosY = -20.0f;          // Posición Y inicial
-const float ringTargetY = -2.0f;  // Posición Y final
-bool animacionRingInicia = false; // Bandera para saber si debe animarse
-float ringRotY = 0.0f;            // Ángulo de rotación inicial en Y
 
 //variables para keyframes
 float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo, ciclo2, contador = 0;
@@ -418,7 +412,13 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
+	Camera camera(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0, 1, 0), -90.0f, 0.0f, 6.0f, 0.1f);
+	glm::vec3 avatar = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera.setAvatarPointer(&avatar);
+
+	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Kiosko
+	camera.addPointOfInterest(glm::vec3(130.0f, 70.0f, 25.0f), glm::vec3(230.0f, 0.0f, 9.0f)); // Fuente
+
 
 	// TEXTURAS
 	brickTexture = Texture("Textures/brick.png");
@@ -447,6 +447,8 @@ int main()
 	Arbusto.LoadModel("Models/Arbusto.obj");
 	Pasto = Model();
 	Pasto.LoadModel("Models/Pasto.obj");
+	FantasticCar = Model();
+	FantasticCar.LoadModel("Models/FANTASTICAR.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
@@ -519,6 +521,7 @@ int main()
 	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
 	glm::vec3 lowerLight = glm::vec3(0.0f, 0.0f, 0.0f);
+	bool cPressed = false, qPressed = false, ePressed = false;
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -530,43 +533,35 @@ int main()
 
 		angulovaria += 0.5f * deltaTime;
 
-
-
 		//Recibir eventos del usuario
 		glfwPollEvents();
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
-		// Bandera para animación del ring
-		if (mainWindow.getsKeys()[GLFW_KEY_R])
-		{
-			animacionRingInicia = true;
-			ringPosY = -20.0f; // Reinicia la posición
-			ringRotY = 0.0f;   // Reinicia la rotación
+		if (mainWindow.getsKeys()[GLFW_KEY_C]) {
+			if (!cPressed) { camera.cycleMode(); cPressed = true; std::cout << "Mode: " << (int)camera.getMode() << std::endl; }
 		}
+		else cPressed = false;
+
+		if (mainWindow.getsKeys()[GLFW_KEY_Q]) {
+			if (!qPressed) { camera.previousPOI(); qPressed = true; std::cout << "PuntoInteres: " << camera.getCurrentPOIIndex() << std::endl; }
+		}
+		else qPressed = false;
+
+		if (mainWindow.getsKeys()[GLFW_KEY_E]) {
+			if (!ePressed) { camera.nextPOI(); ePressed = true; std::cout << "PuntoInteres: " << camera.getCurrentPOIIndex() << std::endl; }
+		}
+		else ePressed = false;
+
+		camera.Update(deltaTime);
+
+		// calcular view y render:
+		glm::mat4 view = camera.calculateViewMatrix();
 
 		//-------Para Keyframes
 		inputKeyframes(mainWindow.getsKeys());
 		animate();
-
-		// *** LÓGICA DE ANIMACIÓN DEL RING ***
-		if (animacionRingInicia)
-		{
-			// Si el ring todavía no llega a su destino
-			if (ringPosY < ringTargetY)
-			{
-				// Moverlo hacia arriba, basado en la velocidad y el deltaTime
-				ringPosY += 0.05f * deltaTime;
-				// Hacer que gire mientras sube
-				ringRotY += 0.05f * deltaTime;
-			}
-			else
-			{
-				// Si ya llegó (o se pasó), clavarlo en la posición final
-				ringPosY = ringTargetY;
-				ringRotY = 0.0f; // Detener la rotación
-			}
-		}
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -636,8 +631,7 @@ int main()
 		// Ring
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-200.0f, ringPosY, -100.0));
-		model = glm::rotate(model, ringRotY, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-200.0f, -2.0f, -100.0));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Ring.RenderModel();
@@ -776,7 +770,7 @@ int main()
 		//color = glm::vec3(0.0f, 1.0f, 0.0f);
 		//glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
+		FantasticCar.RenderModel();
 
 		glUseProgram(0);
 
@@ -829,6 +823,7 @@ void inputKeyframes(bool* keys)
 			saveFrame();
 			printf("movAvion_x es: %f\n", movAvion_x);
 			printf("movAvion_y es: %f\n", movAvion_y);
+			printf("movAvion_z es: %f\n", movAvion_z);
 			printf("presiona P para habilitar guardar otro frame'\n");
 			guardoFrame++;
 			reinicioFrame = 0;
@@ -850,7 +845,7 @@ void inputKeyframes(bool* keys)
 		if (ciclo < 1)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			movAvion_x += 100.0f;
+			movAvion_x += 50.0f;
 			printf("\n movAvion_x es: %f\n", movAvion_x);
 			ciclo++;
 			ciclo2 = 0;
@@ -872,8 +867,8 @@ void inputKeyframes(bool* keys)
 		if (ciclo < 1)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			movAvion_x -= 25.0f;
-			printf("\n movAvion_-x es: %f\n", movAvion_x);
+			movAvion_x -= 50.0f;
+			printf("\n movAvion_x es: %f\n", movAvion_x);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 2 para poder habilitar la variable\n");
@@ -886,7 +881,7 @@ void inputKeyframes(bool* keys)
 		if (ciclo < 1)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
-			movAvion_y += 25.0f;
+			movAvion_y += 50.0f;
 			printf("\n movAvion_y es: %f\n", movAvion_y);
 			ciclo++;
 			ciclo2 = 0;
@@ -911,7 +906,7 @@ void inputKeyframes(bool* keys)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
 			movAvion_y -= 50.0f;
-			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			printf("\n movAvion_y es: %f\n", movAvion_y);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 5 para poder habilitar la variable\n");
@@ -925,10 +920,10 @@ void inputKeyframes(bool* keys)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
 			movAvion_z += 50.0f;
-			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			printf("\n movAvion_z es: %f\n", movAvion_z);
 			ciclo++;
 			ciclo2 = 0;
-			printf("\n Presiona la tecla 85 para poder habilitar la variable\n");
+			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
 		}
 
 	}
@@ -939,7 +934,7 @@ void inputKeyframes(bool* keys)
 		{
 			ciclo = 0;
 			ciclo2++;
-			printf("\n Ya puedes modificar tu variable presionando la tecla 7 o 9\n");
+			printf("\n Ya puedes modificar tu variable presionando la tecla 7, 9 o 0\n");
 		}
 	}
 
@@ -949,7 +944,7 @@ void inputKeyframes(bool* keys)
 		{
 			//printf("movAvion_x es: %f\n", movAvion_x);
 			movAvion_z -= 50.0f;
-			printf("\n movAvion_-y es: %f\n", movAvion_y);
+			printf("\n movAvion_z es: %f\n", movAvion_z);
 			ciclo++;
 			ciclo2 = 0;
 			printf("\n Presiona la tecla 8 para poder habilitar la variable\n");
@@ -975,5 +970,14 @@ void inputKeyframes(bool* keys)
 		}
 
 	}
-}
 
+	camera.keyControl(keys, deltaTime);
+
+	if (keys[GLFW_KEY_C])
+	{
+		camera.cycleMode();
+	}
+	// cambiar punto de vista con Q/E
+	if (keys[GLFW_KEY_Q]) camera.previousPOI();
+	if (keys[GLFW_KEY_E]) camera.nextPOI();
+}
