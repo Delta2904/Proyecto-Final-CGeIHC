@@ -1,3 +1,6 @@
+# Ignorar todos los archivos
+*
+
 # No ignorar el propio archivo .gitignore
 !.gitignore
 
