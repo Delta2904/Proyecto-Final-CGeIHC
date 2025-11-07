@@ -1,0 +1,13 @@
+# No ignorar el propio archivo .gitignore
+!.gitignore
+
+# No ignorar el main
+!FINAL.cpp
+
+# No ignorar la carpeta de texturas ni su contenido
+!Textures/
+!Textures/**
+
+# No ignorar la carpeta de modelos ni su contenido
+!Models/
+!Models/**
