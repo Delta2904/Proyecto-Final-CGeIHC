@@ -412,7 +412,13 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
+	Camera camera(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0, 1, 0), -90.0f, 0.0f, 6.0f, 0.1f);
+	glm::vec3 avatar = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera.setAvatarPointer(&avatar);
+
+	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Kiosko
+	camera.addPointOfInterest(glm::vec3(130.0f, 70.0f, 25.0f), glm::vec3(230.0f, 0.0f, 9.0f)); // Fuente
+
 
 	// TEXTURAS
 	brickTexture = Texture("Textures/brick.png");
@@ -515,6 +521,7 @@ int main()
 	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
 	glm::vec3 lowerLight = glm::vec3(0.0f, 0.0f, 0.0f);
+	bool cPressed = false, qPressed = false, ePressed = false;
 
 	////Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
@@ -526,12 +533,31 @@ int main()
 
 		angulovaria += 0.5f * deltaTime;
 
-
-
 		//Recibir eventos del usuario
 		glfwPollEvents();
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+
+		if (mainWindow.getsKeys()[GLFW_KEY_C]) {
+			if (!cPressed) { camera.cycleMode(); cPressed = true; std::cout << "Mode: " << (int)camera.getMode() << std::endl; }
+		}
+		else cPressed = false;
+
+		if (mainWindow.getsKeys()[GLFW_KEY_Q]) {
+			if (!qPressed) { camera.previousPOI(); qPressed = true; std::cout << "PuntoInteres: " << camera.getCurrentPOIIndex() << std::endl; }
+		}
+		else qPressed = false;
+
+		if (mainWindow.getsKeys()[GLFW_KEY_E]) {
+			if (!ePressed) { camera.nextPOI(); ePressed = true; std::cout << "PuntoInteres: " << camera.getCurrentPOIIndex() << std::endl; }
+		}
+		else ePressed = false;
+
+		camera.Update(deltaTime);
+
+		// calcular view y render:
+		glm::mat4 view = camera.calculateViewMatrix();
 
 		//-------Para Keyframes
 		inputKeyframes(mainWindow.getsKeys());
@@ -746,7 +772,6 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		FantasticCar.RenderModel();
 
-
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
@@ -945,5 +970,14 @@ void inputKeyframes(bool* keys)
 		}
 
 	}
-}
 
+	camera.keyControl(keys, deltaTime);
+
+	if (keys[GLFW_KEY_C]) 
+	{
+		camera.cycleMode();
+	}
+	// cambiar punto de vista con Q/E
+	if (keys[GLFW_KEY_Q]) camera.previousPOI();
+	if (keys[GLFW_KEY_E]) camera.nextPOI();
+}
