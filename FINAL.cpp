@@ -496,18 +496,18 @@ int main()
 	rotllanta = 0.0f;
 	rotllantaOffset = 10.0f;
 	glm::vec3 pos4 = glm::vec3(0.0f, 10.0f, 0.0f);
-	
+
 	//---------PARA TENER KEYFRAMES GUARDADOS NO VOLATILES QUE SIEMPRE SE UTILIZARAN SE DECLARAN AQUÍ
-	
+
 	KeyFrame[0].movAvion_x = 0.0f;
 	KeyFrame[0].movAvion_y = 0.0f;
 	KeyFrame[0].movAvion_z = 0.0f;
 	KeyFrame[0].giroAvion = 90.0;
-	
+
 	ifstream verificador(nombreArchivo);
 	archivoExiste = verificador.good();
 	verificador.close();
-	
+
 	printf("\nTeclas para uso de Keyframes:\n1.-Presionar barra espaciadora para reproducir animacion.\n2.-Presionar 0 para volver a habilitar reproduccion de la animacion\n");
 	printf("3.-Presiona L para guardar frame\n4.-Presiona P para habilitar guardar nuevo frame\n5.-Presiona 1 para mover en X\n6.-Presiona 2 para habilitar moverse");
 	printf("\n7.-Presiona 3 para mover en -X\n8.-Presiona 4 para mover en Y\n9.-Presiona 5 para habilitar moverse en Y\n10.-Presiona 6 para mover en -Y\n11.-Presiona 7 para mover Z");
@@ -665,9 +665,9 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Pasto.RenderModel();
-		
+
 		// Lamparas
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(50.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -675,7 +675,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(50.0f, 7.6f, -20.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -683,7 +683,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(270.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -691,7 +691,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(270.0f, 7.6f, -20.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -699,9 +699,9 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		// MAPA IZQUIERDA
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-50.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -709,7 +709,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-50.0f, 7.6f, -13.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -717,7 +717,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-270.0f, 7.6f, 27.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -725,7 +725,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-270.0f, 7.6f, -13.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -733,7 +733,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, 7.6f, 180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -741,7 +741,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-20.0f, 7.6f, 180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -749,7 +749,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, 7.6f, -180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -757,7 +757,7 @@ int main()
 		model = glm::rotate(model, 90 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-20.0f, 7.6f, -180.0));
 		model = glm::scale(model, glm::vec3(6.0f, 6.0f, 6.0f));
@@ -766,7 +766,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
 
-				// ANIMACIÓN POR KEYFRAMES
+		// ANIMACIÓN POR KEYFRAMES
 
 		model = glm::mat4(1.0);
 		pos4 = glm::vec3(posX4 + movAvion_x, posY4 + movAvion_y, posZ4 + movAvion_z);
@@ -976,5 +976,4 @@ void inputKeyframes(bool* keys)
 
 	}
 }
-
 
