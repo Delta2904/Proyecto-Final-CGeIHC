@@ -13,8 +13,8 @@
 # No ignorar Camera.h y Camera.cpp
 !Camera.*
 
-# No ignorar DirectionalLigth.h y DirectionalLigth.cpp
-!DirectionalLigth.*
+# No ignorar DirectionalLight.h y DirectionalLight.cpp
+!DirectionalLight.*
 
 # No ignorar la carpeta de texturas ni su contenido
 !Textures/
