@@ -50,24 +50,49 @@ const float toRadians = 3.14159265f / 180.0f;
 
 //variables para animación
 float movCoche;
-float movDragon;
+float movglobo;
 float movOffset;
-float movOffsetDragon;
+float movOffsetglobo;
 float rotllanta;
 float rotllantaOffset;
 bool avanza;
-bool avanzadragon;
+bool avanzaglobo;
 float toffsetflechau = 0.0f;
 float toffsetflechav = 0.0f;
 float toffsetnumerou = 0.0f;
 float toffsetnumerov = 0.0f;
 float toffsetnumerocambiau = 0.0;
 float angulovaria = 0.0f;
-float dragonavance = 0.0f;
-float rotaciondragon = 0.0f;
+float globoavance = 0.0f;
+float rotacionglobo = 0.0f;
+float movGloboX = 0.0f;
+float movGloboZ = 0.0f;
+bool avanzarX = true;
+bool avanzarZ = true;
+
+
+// Variables para animación del ring
+float ringPosY = -20.0f;          // Posición Y inicial
+const float ringTargetY = -2.0f;  // Posición Y final
+bool animacionRingInicia = false; // Bandera para saber si debe animarse
+float ringRotY = 0.0f;            // Ángulo de rotación inicial en Y
+
 
 //variables para keyframes
 float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo, ciclo2, contador = 0;
+
+// maquina sacudida
+bool animacionSacude = false;
+float sacudeTime = 0.0f;
+float sacudeDuration = 0.8f;     
+float sacudeAmplitude = 0.75f;   
+float sacudeFrequency = 85.0f;  
+float sacudeDamping = 2.0f;      
+
+
+float sacudeOffsetX = 0.0f;
+float sacudeRotZDeg = 0.0f;
+
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -79,6 +104,7 @@ Texture brickTexture;
 Texture dirtTexture;
 Texture plainTexture;
 Texture pisoTexture;
+Texture cartelBaxterTexture;
 
 Skybox skybox;
 
@@ -92,6 +118,10 @@ Model ChichenItza;
 Model Arbusto;
 Model Pasto;
 Model FantasticCar; // keyframes
+Model Maquina;
+Model Baxter;
+Model Cartel;
+Model Globo;
 
 //materiales
 Material Material_brillante;
@@ -285,7 +315,6 @@ void CreateShaders()
 bool animacion = false;
 
 
-
 //NEW// Keyframes
 float posX4 = -100.0, posY4 = -2.0, posZ4 = -100.0;
 float	movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0f;
@@ -404,6 +433,33 @@ void animate(void)
 
 ///////////////* FIN KEYFRAMES*////////////////////////////
 
+// --- Actualización por frame ---
+void updateSacudida(float deltaTime)
+{
+	if (!animacionSacude) {
+		sacudeOffsetX = 0.0f;
+		sacudeRotZDeg = 0.0f;
+		return;
+	}
+
+	sacudeTime += deltaTime;
+
+	if (sacudeTime <= sacudeDuration) {
+		float t = sacudeTime;
+		float decay = expf(-sacudeDamping * t);
+		float shake = sacudeAmplitude * decay * sinf(sacudeFrequency * t);
+
+		sacudeOffsetX = shake;
+		sacudeRotZDeg = shake * 10.0f; // leve inclinación
+	}
+	else {
+		animacionSacude = false;
+		sacudeOffsetX = 0.0f;
+		sacudeRotZDeg = 0.0f;
+	}
+}
+
+
 int main()
 {
 	mainWindow = Window(1366, 768); // 1280, 1024 or 1024, 768
@@ -429,6 +485,8 @@ int main()
 	plainTexture.LoadTextureA();
 	pisoTexture = Texture("Textures/Piso.png");
 	pisoTexture.LoadTextureA();
+	cartelBaxterTexture = Texture("Textures/CartelBaxter.png");
+	cartelBaxterTexture.LoadTextureA();
 
 	// MODELOS
 	Kiosko = Model();
@@ -449,6 +507,14 @@ int main()
 	Pasto.LoadModel("Models/Pasto.obj");
 	FantasticCar = Model();
 	FantasticCar.LoadModel("Models/FANTASTICAR.obj");
+	Maquina = Model();
+	Maquina.LoadModel("Models/Maquina.obj");
+	Baxter = Model();
+	Baxter.LoadModel("Models/BAXTER.obj");
+	Cartel = Model();
+	Cartel.LoadModel("Models/Cartel.obj");
+	Globo = Model();
+	Globo.LoadModel("Models/Globos.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
@@ -530,6 +596,7 @@ int main()
 		deltaTime = now - lastTime;
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
+		updateSacudida(deltaTime);
 
 		angulovaria += 0.5f * deltaTime;
 
@@ -559,9 +626,48 @@ int main()
 		// calcular view y render:
 		glm::mat4 view = camera.calculateViewMatrix();
 
+		// Bandera para animación del ring
+		if (mainWindow.getsKeys()[GLFW_KEY_R])
+		{
+			animacionRingInicia = true;
+			ringPosY = -20.0f; // Reinicia la posición
+			ringRotY = 0.0f;   // Reinicia la rotación
+		}
+
 		//-------Para Keyframes
 		inputKeyframes(mainWindow.getsKeys());
 		animate();
+
+		// *** LÓGICA DE ANIMACIÓN DEL RING ***
+		if (animacionRingInicia)
+		{
+			// Si el ring todavía no llega a su destino
+			if (ringPosY < ringTargetY)
+			{
+				// Moverlo hacia arriba, basado en la velocidad y el deltaTime
+				ringPosY += 0.05f * deltaTime;
+				// Hacer que gire mientras sube
+				ringRotY += 0.05f * deltaTime;
+			}
+			else
+			{
+				// Si ya llegó (o se pasó), clavarlo en la posición final
+				ringPosY = ringTargetY;
+				ringRotY = 0.0f; // Detener la rotación
+			}
+		}
+		
+
+		static bool mPressed = false;
+		bool keyM = mainWindow.getsKeys()[GLFW_KEY_M];
+
+		if (keyM && !mPressed) {
+			animacionSacude = true;
+			sacudeTime = 0.0f;
+		}
+
+		mPressed = keyM;
+
 
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -631,7 +737,8 @@ int main()
 		// Ring
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-200.0f, -2.0f, -100.0));
+		model = glm::translate(model, glm::vec3(-200.0f, ringPosY, -100.0));
+		model = glm::rotate(model, ringRotY, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Ring.RenderModel();
@@ -771,6 +878,92 @@ int main()
 		//glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		FantasticCar.RenderModel();
+
+		// Animacion basica
+
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::vec3 basePos = glm::vec3(180.0f, -2.0f, -16.0f);
+		model = glm::translate(model, basePos + glm::vec3(sacudeOffsetX, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(sacudeRotZDeg), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Maquina.RenderModel();
+
+		// Edificio Baxter
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(400.0f, -3.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Baxter.RenderModel();
+
+		toffsetnumerocambiau += 0.0005f;
+		if (toffsetnumerocambiau > 1.0f)
+			toffsetnumerocambiau = 0.0f;
+		glm::vec2 toffset = glm::vec2(0.0f, toffsetnumerocambiau);
+		
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(250.0f, -3.0f, 100.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		cartelBaxterTexture.UseTexture();
+		Cartel.RenderModel();
+		
+		GLfloat now2 = glfwGetTime();
+		deltaTime2 = now2 - lastTime2;
+		deltaTime2 += (now2 - lastTime2) / limitFPS;
+		lastTime2 = now2;
+
+		movOffsetglobo = 0.5f;
+
+		if (avanzarX)
+		{
+			if (movGloboX < 250.0f)
+				movGloboX += movOffsetglobo * deltaTime2;
+			else
+			{
+				avanzarX = false;
+				rotacionglobo += 180.0f;
+			}
+		}
+		else
+		{
+			if (movGloboX > -250.0f)
+				movGloboX -= movOffsetglobo * deltaTime2;
+			else
+			{
+				avanzarX = true;
+				rotacionglobo += 180.0f;
+			}
+		}
+
+		if (avanzarZ)
+		{
+			if (movGloboZ < 150.0f)             
+				movGloboZ += (movOffsetglobo * 0.6f) * deltaTime2;
+			else
+				avanzarZ = false;
+		}
+		else
+		{
+			if (movGloboZ > -150.0f)
+				movGloboZ -= (movOffsetglobo * 0.6f) * deltaTime2;
+			else
+				avanzarZ = true;
+		}
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(movGloboX, 5.0f + sin(glm::radians(angulovaria)), 6.0f + movGloboZ));
+		model = glm::rotate(model, glm::radians(rotacionglobo), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(3.3f, 3.0f, 3.0f));
+		Material_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Globo.RenderModel();
+
 
 		glUseProgram(0);
 
@@ -973,11 +1166,13 @@ void inputKeyframes(bool* keys)
 
 	camera.keyControl(keys, deltaTime);
 
-	if (keys[GLFW_KEY_C]) 
+	if (keys[GLFW_KEY_C])
 	{
 		camera.cycleMode();
 	}
 	// cambiar punto de vista con Q/E
 	if (keys[GLFW_KEY_Q]) camera.previousPOI();
 	if (keys[GLFW_KEY_E]) camera.nextPOI();
+
+
 }
