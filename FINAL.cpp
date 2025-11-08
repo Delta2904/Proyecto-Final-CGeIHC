@@ -109,7 +109,8 @@ Texture plainTexture;
 Texture pisoTexture;
 Texture cartelBaxterTexture;
 
-Skybox skybox;
+Skybox skyboxDia;
+Skybox skyboxNoche;
 
 Model Kiosko;
 Model Fuente;
@@ -529,15 +530,25 @@ int main()
 	Arbol = Model();
 	Arbol.LoadModel("Models/Pino.obj");
 
-	std::vector<std::string> skyboxFaces;
-	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
-	skyboxFaces.push_back("Textures/Skybox/Daylight Box_right.bmp");
-	skyboxFaces.push_back("Textures/Skybox/Daylight Box_bottom.bmp");
-	skyboxFaces.push_back("Textures/Skybox/Daylight Box_top.bmp");
-	skyboxFaces.push_back("Textures/Skybox/Daylight Box_back.bmp");
-	skyboxFaces.push_back("Textures/Skybox/Daylight Box_front.bmp");
+	// Cargar Skybox de DÍA
+	std::vector<std::string> skyboxFacesDia;
+	skyboxFacesDia.push_back("Textures/Skybox/Daylight Box_left.bmp");
+	skyboxFacesDia.push_back("Textures/Skybox/Daylight Box_right.bmp");
+	skyboxFacesDia.push_back("Textures/Skybox/Daylight Box_bottom.bmp");
+	skyboxFacesDia.push_back("Textures/Skybox/Daylight Box_top.bmp");
+	skyboxFacesDia.push_back("Textures/Skybox/Daylight Box_back.bmp");
+	skyboxFacesDia.push_back("Textures/Skybox/Daylight Box_front.bmp");
+	skyboxDia = Skybox(skyboxFacesDia);
 
-	skybox = Skybox(skyboxFaces);
+	// Cargar Skybox de NOCHE
+	std::vector<std::string> skyboxFacesNoche;
+	skyboxFacesNoche.push_back("Textures/Skybox/corona_lf.png");
+	skyboxFacesNoche.push_back("Textures/Skybox/corona_rt.png");
+	skyboxFacesNoche.push_back("Textures/Skybox/corona_dn.png");
+	skyboxFacesNoche.push_back("Textures/Skybox/corona_up.png");
+	skyboxFacesNoche.push_back("Textures/Skybox/corona_bk.png");
+	skyboxFacesNoche.push_back("Textures/Skybox/corona_ft.png");
+	skyboxNoche = Skybox(skyboxFacesNoche);
 
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 4);
@@ -574,7 +585,7 @@ int main()
 	float ringCenterX = -200.0f;
 	float ringCenterZ = -100.0f;
 	float ringY = -1.0f; // Altura de las luces
-	float ringOffset = 25.0f; // Distancia desde el centro del ring
+	float ringOffset = 50.0f; // Distancia desde el centro del ring
 	// Posiciones de las 4 esquinas
 	glm::vec3 posSL1 = glm::vec3(ringCenterX - ringOffset, ringY, ringCenterZ - ringOffset); // Esquina 1
 	glm::vec3 posSL2 = glm::vec3(ringCenterX + ringOffset, ringY, ringCenterZ - ringOffset); // Esquina 2
@@ -631,6 +642,11 @@ int main()
 	GLuint uniformColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 
+	// Variables para cambiar de skybox
+	bool esDeDia = true;                 // Empezamos de día
+	float tiempoCiclo = 0.0f;            // Acumulador de tiempo
+	const float duracionCiclo = 1000.0f;  // Tiempo para cambiar
+
 	movCoche = 0.0f;
 	movOffset = 0.0f;
 	rotllanta = 0.0f;
@@ -669,8 +685,25 @@ int main()
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
 		updateSacudida(deltaTime);
-
 		angulovaria += 0.5f * deltaTime;
+
+		// Actualización del skybox según el tiempo
+		tiempoCiclo += deltaTime; // Acumular el tiempo transcurrido
+		if (tiempoCiclo >= duracionCiclo)
+		{
+			esDeDia = !esDeDia; // Invierte el estado (día a noche o noche a día)
+			tiempoCiclo = 0.0f; // Reinicia el contador
+		}
+		if (esDeDia)
+		{
+			// Luz fuerte para el día
+			mainLight.SetIntensity(0.3f, 0.3f);
+		}
+		else
+		{
+			// Luz muy tenue para la noche
+			mainLight.SetIntensity(0.05f, 0.08f);
+		}
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -744,7 +777,14 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		skybox.DrawSkybox(camera.calculateViewMatrix(), projection);
+		if (esDeDia)
+		{
+			skyboxDia.DrawSkybox(camera.calculateViewMatrix(), projection);
+		}
+		else
+		{
+			skyboxNoche.DrawSkybox(camera.calculateViewMatrix(), projection);
+		}
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
