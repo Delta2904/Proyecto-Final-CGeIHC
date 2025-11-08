@@ -77,6 +77,9 @@ const float ringTargetY = -2.0f;  // Posición Y final
 bool animacionRingInicia = false; // Bandera para saber si debe animarse
 float ringRotY = 0.0f;            // Ángulo de rotación inicial en Y
 
+// Variables para luces en el ring
+bool lucesRingEncendidas = true; // Empiezan encendidas
+bool tPressed = false;           // Control para la tecla 'T'
 
 //variables para keyframes
 float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo, ciclo2, contador = 0;
@@ -563,6 +566,65 @@ int main()
 		5.0f);
 	spotLightCount++;
 
+	// Luces del ring
+	// Colores
+	glm::vec3 colorVerde = glm::vec3(0.0f, 0.8f, 0.2f); // Verde árbol
+	glm::vec3 colorMorado = glm::vec3(0.7f, 0.2f, 1.0f); // Morado
+	// Posición del Ring
+	float ringCenterX = -200.0f;
+	float ringCenterZ = -100.0f;
+	float ringY = -1.0f; // Altura de las luces
+	float ringOffset = 25.0f; // Distancia desde el centro del ring
+	// Posiciones de las 4 esquinas
+	glm::vec3 posSL1 = glm::vec3(ringCenterX - ringOffset, ringY, ringCenterZ - ringOffset); // Esquina 1
+	glm::vec3 posSL2 = glm::vec3(ringCenterX + ringOffset, ringY, ringCenterZ - ringOffset); // Esquina 2
+	glm::vec3 posSL3 = glm::vec3(ringCenterX - ringOffset, ringY, ringCenterZ + ringOffset); // Esquina 3
+	glm::vec3 posSL4 = glm::vec3(ringCenterX + ringOffset, ringY, ringCenterZ + ringOffset); // Esquina 4
+	// Dirección: Apuntando "hacia arriba y hacia el centro"
+	// Definimos un punto objetivo alto, en el centro del ring
+	glm::vec3 targetPos = glm::vec3(ringCenterX, 15.0f, ringCenterZ);
+	glm::vec3 dirSL1 = glm::normalize(targetPos - posSL1);
+	glm::vec3 dirSL2 = glm::normalize(targetPos - posSL2);
+	glm::vec3 dirSL3 = glm::normalize(targetPos - posSL3);
+	glm::vec3 dirSL4 = glm::normalize(targetPos - posSL4);
+	float luzIntensidad = 6.0f; // Qué tan brillantes son
+	float luzAngulo = 20.0f;     // Qué tan abierto es el cono de luz
+
+	// Luz 1 (Verde) - Esquina 1
+	spotLights[1] = SpotLight(colorVerde.x, colorVerde.y, colorVerde.z,
+		0.0f, luzIntensidad,           // aIntensity, dIntensity
+		posSL1.x, posSL1.y, posSL1.z, // pos
+		dirSL1.x, dirSL1.y, dirSL1.z, // dir
+		1.0f, 0.0f, 0.001f,           // con, lin, exp 
+		luzAngulo);                   // ángulo
+	spotLightCount++; 
+
+	// Luz 2 (Morado) - Esquina 2
+	spotLights[2] = SpotLight(colorMorado.x, colorMorado.y, colorMorado.z,
+		0.0f, luzIntensidad,
+		posSL2.x, posSL2.y, posSL2.z,
+		dirSL2.x, dirSL2.y, dirSL2.z,
+		1.0f, 0.0f, 0.001f,
+		luzAngulo);
+	spotLightCount++;
+
+	// Luz 3 (Verde) - Esquina 3
+	spotLights[3] = SpotLight(colorVerde.x, colorVerde.y, colorVerde.z,
+		0.0f, luzIntensidad,
+		posSL3.x, posSL3.y, posSL3.z,
+		dirSL3.x, dirSL3.y, dirSL3.z,
+		1.0f, 0.0f, 0.001f,
+		luzAngulo);
+	spotLightCount++;
+
+	// Luz 4 (Morado) - Esquina 4
+	spotLights[4] = SpotLight(colorMorado.x, colorMorado.y, colorMorado.z,
+		0.0f, luzIntensidad,
+		posSL4.x, posSL4.y, posSL4.z,
+		dirSL4.x, dirSL4.y, dirSL4.z,
+		1.0f, 0.0f, 0.001f,
+		luzAngulo);
+	spotLightCount++; 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
 		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset = 0;
@@ -707,7 +769,18 @@ int main()
 		//información al shader de fuentes de iluminación
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
-		shaderList[0].SetSpotLights(spotLights, spotLightCount);
+
+		// NUEVO: Activa/desactiva las luces del ring
+		if (lucesRingEncendidas)
+		{
+			// Envía todas las luces (linterna + 4 del ring)
+			shaderList[0].SetSpotLights(spotLights, spotLightCount); // spotLightCount es 5
+		}
+		else
+		{
+			// Envía solo la primera luz (la linterna en el índice 0)
+			shaderList[0].SetSpotLights(spotLights, 1);
+		}
 
 		//Reinicializando variables cada ciclo de reloj
 		model = glm::mat4(1.0);
@@ -1230,4 +1303,16 @@ void inputKeyframes(bool* keys)
 	if (keys[GLFW_KEY_Q]) camera.previousPOI();
 	if (keys[GLFW_KEY_E]) camera.nextPOI();
 
+	if (mainWindow.getsKeys()[GLFW_KEY_T])
+	{
+		if (!tPressed)
+		{
+			lucesRingEncendidas = !lucesRingEncendidas; // Invierte el estado
+			tPressed = true;
+		}
+	}
+	else
+	{
+		tPressed = false;
+	}
 }
