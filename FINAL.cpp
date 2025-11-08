@@ -84,10 +84,10 @@ float reproduciranimacion, habilitaranimacion, guardoFrame, reinicioFrame, ciclo
 // maquina sacudida
 bool animacionSacude = false;
 float sacudeTime = 0.0f;
-float sacudeDuration = 0.8f;     
-float sacudeAmplitude = 0.75f;   
-float sacudeFrequency = 85.0f;  
-float sacudeDamping = 2.0f;      
+float sacudeDuration = 0.8f;
+float sacudeAmplitude = 0.75f;
+float sacudeFrequency = 85.0f;
+float sacudeDamping = 2.0f;
 
 
 float sacudeOffsetX = 0.0f;
@@ -122,6 +122,7 @@ Model Maquina;
 Model Baxter;
 Model Cartel;
 Model Globo;
+Model Arbol;
 
 //materiales
 Material Material_brillante;
@@ -474,9 +475,9 @@ int main()
 
 	// PUNTOS DE INTERES
 	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Kiosko
-	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(230.0f, 0.0f, 9.0f)); // Fuente
+	camera.addPointOfInterest(glm::vec3(0.0f, 70.0f, -80.0f), glm::vec3(160.0f, -2.0f, -100.0)); // Fuente
 	camera.addPointOfInterest(glm::vec3(-100.0f, 70.0f, 25.0f), glm::vec3(-200.0f, 0.0f, 100.0f)); // Chichen Itza
-	camera.addPointOfInterest(glm::vec3(-100.0f, 70.0f, 25.0f), glm::vec3(-200.0f, 0.0f, -100.0f)); // Ring
+	camera.addPointOfInterest(glm::vec3(-150.0f, 70.0f, 25.0f), glm::vec3(-200.0f, 0.0f, -100.0f)); // Ring
 	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(180.0f, 0.0f, -16.0f)); // Máquina
 	camera.addPointOfInterest(glm::vec3(-100.0f, 70.0f, 0.0f), glm::vec3(-100.0f, 0.0f, -100.0f)); // Fantasticar
 	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, -80.0f)); // Escultura
@@ -522,6 +523,8 @@ int main()
 	Cartel.LoadModel("Models/Cartel.obj");
 	Globo = Model();
 	Globo.LoadModel("Models/Globos.obj");
+	Arbol = Model();
+	Arbol.LoadModel("Models/Pino.obj");
 
 	std::vector<std::string> skyboxFaces;
 	skyboxFaces.push_back("Textures/Skybox/Daylight Box_left.bmp");
@@ -663,7 +666,7 @@ int main()
 				ringRotY = 0.0f; // Detener la rotación
 			}
 		}
-		
+
 
 		static bool mPressed = false;
 		bool keyM = mainWindow.getsKeys()[GLFW_KEY_M];
@@ -736,7 +739,7 @@ int main()
 		// Fuente
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(230.0f, -2.0f, 9.0));
+		model = glm::translate(model, glm::vec3(160.0f, -2.0f, -100.0));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Fuente.RenderModel();
@@ -785,9 +788,9 @@ int main()
 		//glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		FantasticCar.RenderModel();
-		
+
 		// Animacion basica
-		
+
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::vec3 basePos = glm::vec3(180.0f, -2.0f, -16.0f);
 		model = glm::translate(model, basePos + glm::vec3(sacudeOffsetX, 0.0f, 0.0f));
@@ -796,37 +799,23 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Maquina.RenderModel();
-		
+
 		// Edificio Baxter
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(370.0f, -3.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Baxter.RenderModel();
-		
-		toffsetnumerocambiau += 0.0005f;
-		if (toffsetnumerocambiau > 1.0f)
-			toffsetnumerocambiau = 0.0f;
-		glm::vec2 toffset = glm::vec2(0.0f, toffsetnumerocambiau);
-		
-		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(250.0f, -3.0f, 100.0));
-		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		cartelBaxterTexture.UseTexture();
-		Cartel.RenderModel();
-		
+
 		GLfloat now2 = glfwGetTime();
 		deltaTime2 = now2 - lastTime2;
 		deltaTime2 += (now2 - lastTime2) / limitFPS;
 		lastTime2 = now2;
-		
+
 		movOffsetglobo = 0.5f;
-		
+
 		if (avanzarX)
 		{
 			if (movGloboX < 250.0f)
@@ -847,7 +836,7 @@ int main()
 				rotacionglobo += 180.0f;
 			}
 		}
-		
+
 		if (avanzarZ)
 		{
 			if (movGloboZ < 150.0f)
@@ -862,7 +851,7 @@ int main()
 			else
 				avanzarZ = true;
 		}
-		
+
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(movGloboX, 5.0f + sin(glm::radians(angulovaria)), 6.0f + movGloboZ));
 		model = glm::rotate(model, glm::radians(rotacionglobo), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -870,85 +859,168 @@ int main()
 		Material_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Globo.RenderModel();
-		
+
 		// -- COMPILADO DE OBJETOS SECUNDARIOS DEL PARQUE --
-		
+
 		// Lamparas
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(50.0f, -2.0f, 27.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(50.0f, -2.0f, -20.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(270.0f, -2.0f, 27.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(270.0f, -2.0f, -20.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		// MAPA IZQUIERDA
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-50.0f, -2.0f, 27.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-50.0f, -2.0f, -13.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-270.0f, -2.0f, 27.0));
+		model = glm::translate(model, glm::vec3(-250.0f, -2.0f, 27.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-270.0f, -2.0f, -13.0));
+		model = glm::translate(model, glm::vec3(-250.0f, -2.0f, -13.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, -2.0f, 180.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-20.0f, -2.0f, 180.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(25.0f, -2.0f, -180.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
-		
+
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-20.0f, -2.0f, -180.0));
 		model = glm::scale(model, glm::vec3(5.0f, 5.0f, 5.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Lampara.RenderModel();
 
+		// Pinos
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(140.0f, -2.0f, -50.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(70.0f, -2.0f, -150.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(210.0f, -2.0f, -100.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(140.0f, -2.0f, -125.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(140.0f, -2.0f, 50.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(70.0f, -2.0f, 150.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(210.0f, -2.0f, 100.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(140.0f, -2.0f, 125.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-140.0f, -2.0f, -50.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-70.0f, -2.0f, -150.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-250.0f, -2.0f, -125.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Arbol.RenderModel();
+
+		// Letrero
+
+		toffsetnumerocambiau += 0.0005f;
+		if (toffsetnumerocambiau > 1.0f)
+			toffsetnumerocambiau = 0.0f;
+		glm::vec2 toffset = glm::vec2(0.0f, toffsetnumerocambiau);
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(250.0f, -3.0f, 100.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		cartelBaxterTexture.UseTexture();
+		Cartel.RenderModel();
 		glUseProgram(0);
 
 		mainWindow.swapBuffers();
@@ -1157,6 +1229,5 @@ void inputKeyframes(bool* keys)
 	// cambiar punto de vista con Q/E
 	if (keys[GLFW_KEY_Q]) camera.previousPOI();
 	if (keys[GLFW_KEY_E]) camera.nextPOI();
-
 
 }
