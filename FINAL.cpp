@@ -472,8 +472,15 @@ int main()
 	glm::vec3 avatar = glm::vec3(0.0f, 0.0f, 0.0f);
 	camera.setAvatarPointer(&avatar);
 
+	// PUNTOS DE INTERES
 	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //Kiosko
-	camera.addPointOfInterest(glm::vec3(130.0f, 70.0f, 25.0f), glm::vec3(230.0f, 0.0f, 9.0f)); // Fuente
+	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(230.0f, 0.0f, 9.0f)); // Fuente
+	camera.addPointOfInterest(glm::vec3(-100.0f, 70.0f, 25.0f), glm::vec3(-200.0f, 0.0f, 100.0f)); // Chichen Itza
+	camera.addPointOfInterest(glm::vec3(-100.0f, 70.0f, 25.0f), glm::vec3(-200.0f, 0.0f, -100.0f)); // Ring
+	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(180.0f, 0.0f, -16.0f)); // Máquina
+	camera.addPointOfInterest(glm::vec3(-100.0f, 70.0f, 0.0f), glm::vec3(-100.0f, 0.0f, -100.0f)); // Fantasticar
+	camera.addPointOfInterest(glm::vec3(100.0f, 70.0f, 25.0f), glm::vec3(0.0f, 0.0f, -80.0f)); // Escultura
+	camera.addPointOfInterest(glm::vec3(-100.0f, 100.0f, 0.0f), glm::vec3(370.0f, 400.0f, 0.0f)); // BAXTER
 
 
 	// TEXTURAS
@@ -893,7 +900,7 @@ int main()
 		// Edificio Baxter
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(400.0f, -3.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(370.0f, -3.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(360.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
