@@ -558,13 +558,89 @@ int main()
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
 		0.3f, 0.3f,
 		0.0f, 0.0f, -1.0f);
+
 	//contador de luces puntuales
 	unsigned int pointLightCount = 0;
-	//Declaración de primer luz puntual
-	pointLights[0] = PointLight(1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f,
-		0.0f, 2.5f, 1.5f,
-		0.3f, 0.2f, 0.1f);
+
+	// --- PARÁMETROS DE LUZ DE LAS LÁMPARAS ---
+	glm::vec3 luzColor = glm::vec3(1.0f, 1.0f, 0.7f);	// Un blanco cálido
+	float lampara_luzIntensidad = 6.0f;							// Intensidad difusa
+	float lampara_luzAtenuacionCon = 0.3f;
+	float lampara_luzAtenuacionLin = 0.2f;
+	float lampara_luzAtenuacionExp = 0.1f;
+	float luzAltura = 20.0f;
+
+	// Declaración de las luces puntuales de las lámparas
+	// Luz 1 (Pos: 50, 27)
+	pointLights[0] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		50.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 2 (Pos: 50, -20)
+	pointLights[1] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		50.0f, luzAltura, -20.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 3 (Pos: 270, 27)
+	pointLights[2] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		270.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 4 (Pos: 270, -20)
+	pointLights[3] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		270.0f, luzAltura, -20.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 5 (Pos: -50, 27)
+	pointLights[4] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-50.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 6 (Pos: -50, -13)
+	pointLights[5] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-50.0f, luzAltura, -13.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 7 (Pos: -250, 27)
+	pointLights[6] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-250.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 8 (Pos: -250, -13)
+	pointLights[7] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-250.0f, luzAltura, -13.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 9 (Pos: 25, 180)
+	pointLights[8] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		25.0f, luzAltura, 180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 10 (Pos: -20, 180)
+	pointLights[9] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-20.0f, luzAltura, 180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 11 (Pos: 25, -180)
+	pointLights[10] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		25.0f, luzAltura, -180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 12 (Pos: -20, -180)
+	pointLights[11] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-20.0f, luzAltura, -180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
 	pointLightCount++;
 
 	unsigned int spotLightCount = 0;
@@ -694,6 +770,7 @@ int main()
 			esDeDia = !esDeDia; // Invierte el estado (día a noche o noche a día)
 			tiempoCiclo = 0.0f; // Reinicia el contador
 		}
+
 		if (esDeDia)
 		{
 			// Luz fuerte para el día
@@ -808,9 +885,19 @@ int main()
 
 		//información al shader de fuentes de iluminación
 		shaderList[0].SetDirectionalLight(&mainLight);
-		shaderList[0].SetPointLights(pointLights, pointLightCount);
 
-		// NUEVO: Activa/desactiva las luces del ring
+		// Lógica de luces de lámpara para el ciclo Día/Noche
+		if (esDeDia)
+		{
+			shaderList[0].SetPointLights(pointLights, 0); 
+		}
+		else
+		{
+			// NO OLVIDAR DESCOMENTAR ESTA LÍNEA PARA QUE LAS LUCES FUNCIONEN EN LA NOCHE
+			// shaderList[0].SetPointLights(pointLights, pointLightCount);
+		}
+
+		// Activa/desactiva las luces del ring
 		if (lucesRingEncendidas)
 		{
 			// Envía todas las luces (linterna + 4 del ring)
