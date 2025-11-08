@@ -718,10 +718,9 @@ int main()
 	GLuint uniformColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 
-	// Variables para cambiar de skybox
-	bool esDeDia = true;                 // Empezamos de día
-	float tiempoCiclo = 0.0f;            // Acumulador de tiempo
-	const float duracionCiclo = 1000.0f;  // Tiempo para cambiar
+	// Variables para el ciclo del sol
+	float anguloSol = 0.0f;          // El ángulo actual del sol
+	float velocidadSol = 0.1f;
 
 	movCoche = 0.0f;
 	movOffset = 0.0f;
@@ -761,26 +760,16 @@ int main()
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
 		updateSacudida(deltaTime);
-		angulovaria += 0.5f * deltaTime;
 
-		// Actualización del skybox según el tiempo
-		tiempoCiclo += deltaTime; // Acumular el tiempo transcurrido
-		if (tiempoCiclo >= duracionCiclo)
+		// Lógica para el movimiento del sol
+		anguloSol += velocidadSol * deltaTime;
+		if (anguloSol > 360.0f)
 		{
-			esDeDia = !esDeDia; // Invierte el estado (día a noche o noche a día)
-			tiempoCiclo = 0.0f; // Reinicia el contador
+			anguloSol -= 360.0f;
 		}
-
-		if (esDeDia)
-		{
-			// Luz fuerte para el día
-			mainLight.SetIntensity(0.3f, 0.3f);
-		}
-		else
-		{
-			// Luz muy tenue para la noche
-			mainLight.SetIntensity(0.05f, 0.08f);
-		}
+		float solDirY = -cos(glm::radians(anguloSol));
+		float solDirZ = -sin(glm::radians(anguloSol));
+		mainLight.SetDirection(0.0f, solDirY, solDirZ);
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -854,12 +843,14 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if (esDeDia)
+		if (solDirY > 0.0f) // El sol está sobre el horizonte
 		{
+			// ES DE DÍA
 			skyboxDia.DrawSkybox(camera.calculateViewMatrix(), projection);
 		}
 		else
 		{
+			// ES DE NOCHE
 			skyboxNoche.DrawSkybox(camera.calculateViewMatrix(), projection);
 		}
 		shaderList[0].UseShader();
@@ -883,21 +874,29 @@ int main()
 		lowerLight.y -= 0.3f;
 		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
-		//información al shader de fuentes de iluminación
+		// Calcula la intensidad del sol
+		float factorSol = max(0.0f, solDirY); // 0.0 de noche, 1.0 en el punto más alto del día
+
+		// Va cambiando la intensidad del sol conforme avanza y se hace de día y de noche
+		float intAmb = 0.05f + (factorSol * (0.3f - 0.05f));
+		float intDiff = 0.08f + (factorSol * (0.3f - 0.08f));
+		mainLight.SetIntensity(intAmb, intDiff);
+
+		// La luz del sol
 		shaderList[0].SetDirectionalLight(&mainLight);
 
-		// Lógica de luces de lámpara para el ciclo Día/Noche
-		if (esDeDia)
+		// Indica cuando se prenden/apagan las luces y cambia el skybox
+		if (solDirY > 0.0f) // El sol está sobre el horizonte
 		{
-			shaderList[0].SetPointLights(pointLights, 0); 
+			// ES DE DÍA
+			shaderList[0].SetPointLights(pointLights, 0); // Lámparas apagadas
 		}
 		else
 		{
-			// NO OLVIDAR DESCOMENTAR ESTA LÍNEA PARA QUE LAS LUCES FUNCIONEN EN LA NOCHE
-			// shaderList[0].SetPointLights(pointLights, pointLightCount);
+			// ES DE NOCHE
+			shaderList[0].SetPointLights(pointLights, pointLightCount); // Lámparas encendidas
 		}
-
-		// Activa/desactiva las luces del ring
+		// Luces del ring
 		if (lucesRingEncendidas)
 		{
 			// Envía todas las luces (linterna + 4 del ring)

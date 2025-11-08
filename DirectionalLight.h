@@ -15,6 +15,8 @@ public:
 
 	void SetIntensity(GLfloat aIntensity, GLfloat dIntensity);
 
+	void SetDirection(GLfloat x, GLfloat y, GLfloat z);
+
 	~DirectionalLight();
 
 private:

@@ -31,3 +31,8 @@ void DirectionalLight::SetIntensity(GLfloat aIntensity, GLfloat dIntensity)
 	ambientIntensity = aIntensity;
 	diffuseIntensity = dIntensity;
 }
+
+void DirectionalLight::SetDirection(GLfloat x, GLfloat y, GLfloat z)
+{
+	direction = glm::vec3(x, y, z);
+}
