@@ -558,13 +558,89 @@ int main()
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
 		0.3f, 0.3f,
 		0.0f, 0.0f, -1.0f);
+
 	//contador de luces puntuales
 	unsigned int pointLightCount = 0;
-	//Declaración de primer luz puntual
-	pointLights[0] = PointLight(1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f,
-		0.0f, 2.5f, 1.5f,
-		0.3f, 0.2f, 0.1f);
+
+	// --- PARÁMETROS DE LUZ DE LAS LÁMPARAS ---
+	glm::vec3 luzColor = glm::vec3(1.0f, 1.0f, 0.7f);	// Un blanco cálido
+	float lampara_luzIntensidad = 6.0f;							// Intensidad difusa
+	float lampara_luzAtenuacionCon = 0.3f;
+	float lampara_luzAtenuacionLin = 0.2f;
+	float lampara_luzAtenuacionExp = 0.1f;
+	float luzAltura = 20.0f;
+
+	// Declaración de las luces puntuales de las lámparas
+	// Luz 1 (Pos: 50, 27)
+	pointLights[0] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		50.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 2 (Pos: 50, -20)
+	pointLights[1] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		50.0f, luzAltura, -20.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 3 (Pos: 270, 27)
+	pointLights[2] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		270.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 4 (Pos: 270, -20)
+	pointLights[3] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		270.0f, luzAltura, -20.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 5 (Pos: -50, 27)
+	pointLights[4] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-50.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 6 (Pos: -50, -13)
+	pointLights[5] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-50.0f, luzAltura, -13.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 7 (Pos: -250, 27)
+	pointLights[6] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-250.0f, luzAltura, 27.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 8 (Pos: -250, -13)
+	pointLights[7] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-250.0f, luzAltura, -13.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 9 (Pos: 25, 180)
+	pointLights[8] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		25.0f, luzAltura, 180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 10 (Pos: -20, 180)
+	pointLights[9] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-20.0f, luzAltura, 180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 11 (Pos: 25, -180)
+	pointLights[10] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		25.0f, luzAltura, -180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
+	pointLightCount++;
+
+	// Luz 12 (Pos: -20, -180)
+	pointLights[11] = PointLight(luzColor.x, luzColor.y, luzColor.z, 0.1f, lampara_luzIntensidad,
+		-20.0f, luzAltura, -180.0f,
+		lampara_luzAtenuacionCon, lampara_luzAtenuacionLin, lampara_luzAtenuacionExp);
 	pointLightCount++;
 
 	unsigned int spotLightCount = 0;
@@ -642,10 +718,9 @@ int main()
 	GLuint uniformColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 
-	// Variables para cambiar de skybox
-	bool esDeDia = true;                 // Empezamos de día
-	float tiempoCiclo = 0.0f;            // Acumulador de tiempo
-	const float duracionCiclo = 1000.0f;  // Tiempo para cambiar
+	// Variables para el ciclo del sol
+	float anguloSol = 0.0f;          // El ángulo actual del sol
+	float velocidadSol = 0.1f;
 
 	movCoche = 0.0f;
 	movOffset = 0.0f;
@@ -685,25 +760,16 @@ int main()
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
 		updateSacudida(deltaTime);
-		angulovaria += 0.5f * deltaTime;
 
-		// Actualización del skybox según el tiempo
-		tiempoCiclo += deltaTime; // Acumular el tiempo transcurrido
-		if (tiempoCiclo >= duracionCiclo)
+		// Lógica para el movimiento del sol
+		anguloSol += velocidadSol * deltaTime;
+		if (anguloSol > 360.0f)
 		{
-			esDeDia = !esDeDia; // Invierte el estado (día a noche o noche a día)
-			tiempoCiclo = 0.0f; // Reinicia el contador
+			anguloSol -= 360.0f;
 		}
-		if (esDeDia)
-		{
-			// Luz fuerte para el día
-			mainLight.SetIntensity(0.3f, 0.3f);
-		}
-		else
-		{
-			// Luz muy tenue para la noche
-			mainLight.SetIntensity(0.05f, 0.08f);
-		}
+		float solDirY = -cos(glm::radians(anguloSol));
+		float solDirZ = -sin(glm::radians(anguloSol));
+		mainLight.SetDirection(0.0f, solDirY, solDirZ);
 
 		//Recibir eventos del usuario
 		glfwPollEvents();
@@ -777,12 +843,14 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if (esDeDia)
+		if (solDirY > 0.0f) // El sol está sobre el horizonte
 		{
+			// ES DE DÍA
 			skyboxDia.DrawSkybox(camera.calculateViewMatrix(), projection);
 		}
 		else
 		{
+			// ES DE NOCHE
 			skyboxNoche.DrawSkybox(camera.calculateViewMatrix(), projection);
 		}
 		shaderList[0].UseShader();
@@ -806,11 +874,29 @@ int main()
 		lowerLight.y -= 0.3f;
 		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
-		//información al shader de fuentes de iluminación
-		shaderList[0].SetDirectionalLight(&mainLight);
-		shaderList[0].SetPointLights(pointLights, pointLightCount);
+		// Calcula la intensidad del sol
+		float factorSol = max(0.0f, solDirY); // 0.0 de noche, 1.0 en el punto más alto del día
 
-		// NUEVO: Activa/desactiva las luces del ring
+		// Va cambiando la intensidad del sol conforme avanza y se hace de día y de noche
+		float intAmb = 0.05f + (factorSol * (0.3f - 0.05f));
+		float intDiff = 0.08f + (factorSol * (0.3f - 0.08f));
+		mainLight.SetIntensity(intAmb, intDiff);
+
+		// La luz del sol
+		shaderList[0].SetDirectionalLight(&mainLight);
+
+		// Indica cuando se prenden/apagan las luces y cambia el skybox
+		if (solDirY > 0.0f) // El sol está sobre el horizonte
+		{
+			// ES DE DÍA
+			shaderList[0].SetPointLights(pointLights, 0); // Lámparas apagadas
+		}
+		else
+		{
+			// ES DE NOCHE
+			shaderList[0].SetPointLights(pointLights, pointLightCount); // Lámparas encendidas
+		}
+		// Luces del ring
 		if (lucesRingEncendidas)
 		{
 			// Envía todas las luces (linterna + 4 del ring)
