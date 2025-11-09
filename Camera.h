@@ -34,7 +34,7 @@ public:
     void setMode(CameraMode m) { modeActual = m; }
     CameraMode getMode() const { return modeActual; }
 
-	// para la camara de puntos de interés 
+    // para la camara de puntos de interï¿½s 
     void addPointOfInterest(const glm::vec3& poiPosition, const glm::vec3& poiTarget);
     void nextPOI();
     void previousPOI();
@@ -46,12 +46,14 @@ public:
 
     ~Camera();
 
-    GLfloat tpDistance = 6.0f;   // distancia detrás del avatar (3ra persona) -> seleccionaste 6.0
-    GLfloat tpHeight = 4.0f;     // altura sobre el avatar -> seleccionaste 4.0
-    GLfloat tpMoveSpeed = 6.0f;  // velocidad de movimiento del avatar (WASD)
+    GLfloat tpDistance = 60.0f; 
+    GLfloat tpHeight = 15.0f;     
+    GLfloat tpMoveSpeed = 3.0f; 
 
-    GLfloat aerialHeight = 15.0f;    // altura por defecto de la cámara aérea
-    GLfloat aerialSpeed = 10.0f;     // velocidad de desplazamiento en XZ en modo aéreo
+    GLfloat aerialHeight = 15.0f;   
+    GLfloat aerialSpeed = 10.0f;     
+    glm::vec3 getLastMoveDir() const { return lastMoveDir; }
+    glm::vec3 lastMoveDir = glm::vec3(0.0f);
 
 
 private:
@@ -66,6 +68,7 @@ private:
 
     GLfloat moveSpeed;
     GLfloat turnSpeed;
+    
 
     // estado del modo
     CameraMode modeActual = CameraMode::tercera_persona;
@@ -75,12 +78,12 @@ private:
     // Points of Interest: cada entrada es (cameraPosition, lookAtTarget)
     struct POI { glm::vec3 camPos; glm::vec3 lookTarget; };
     std::vector<POI> pointsOfInterest;
-    int currentPOIIndex = -1; 
+    int currentPOIIndex = -1;
 
     void updateVectors(); // actualizar front/right/up desde yaw/pitch
 
     // helpers internos
     void applyThirdPersonImmediate(); // tercera persona
-    void applyAerial();               // modo aérea
+    void applyAerial();               // modo aerea
     void applyPOI();                  // interes
 };

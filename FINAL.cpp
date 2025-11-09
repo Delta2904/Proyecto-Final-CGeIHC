@@ -127,6 +127,9 @@ Model Baxter;
 Model Cartel;
 Model Globo;
 Model Arbol;
+Model CuerpoH;
+Model BrazoDH;
+Model BrazoIH;
 
 //materiales
 Material Material_brillante;
@@ -474,7 +477,7 @@ int main()
 	CreateShaders();
 
 	Camera camera(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0, 1, 0), -90.0f, 0.0f, 6.0f, 0.1f);
-	glm::vec3 avatar = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 avatar = glm::vec3(0.0f, -2.0f, 170.0f);
 	camera.setAvatarPointer(&avatar);
 
 	// PUNTOS DE INTERES
@@ -529,6 +532,12 @@ int main()
 	Globo.LoadModel("Models/Globos.obj");
 	Arbol = Model();
 	Arbol.LoadModel("Models/Pino.obj");
+	CuerpoH = Model();
+	CuerpoH.LoadModel("Models/CuerpoH.obj");
+	BrazoDH = Model();
+	BrazoDH.LoadModel("Models/BrazoDH.obj");
+	BrazoIH = Model();
+	BrazoIH.LoadModel("Models/BrazoIH.obj");
 
 	// Cargar Skybox de DÍA
 	std::vector<std::string> skyboxFacesDia;
@@ -722,6 +731,13 @@ int main()
 	float anguloSol = 0.0f;          // El ángulo actual del sol
 	float velocidadSol = 0.1f;
 
+	float walkTime = 0.0f;
+
+	glm::vec3 dir = camera.getLastMoveDir();
+	if (glm::length(dir) > 0.0f)
+		walkTime += deltaTime * 6.0f;
+
+	float brazoSwing = sin(walkTime) * glm::radians(25.0f);
 	movCoche = 0.0f;
 	movOffset = 0.0f;
 	rotllanta = 0.0f;
@@ -1058,6 +1074,42 @@ int main()
 		Material_brillante.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Globo.RenderModel();
+
+		// avatar
+
+		if (glm::length(camera.lastMoveDir) > 0.0f)
+			walkTime += deltaTime * 6.0f;
+		else
+			walkTime = 0.0f;                    
+		
+		float armSwing = sin(walkTime) * 25.0f; 
+		
+		glm::mat4 modelAvatarBase = glm::mat4(1.0f);
+		modelAvatarBase = glm::translate(modelAvatarBase, avatar);
+		modelAvatarBase = glm::scale(modelAvatarBase, glm::vec3(3.0f));
+		
+		// cuerpo
+		glm::mat4 modelCuerpo = modelAvatarBase;
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(modelCuerpo));
+		CuerpoH.RenderModel();
+		
+		float brazoSwing = sin(walkTime) * glm::radians(25.0f);
+		
+		// Brazo derecho
+		model = modelaux2;
+		model = glm::translate(model, avatar); // posición del avatar
+		model = glm::rotate(model, glm::radians(armSwing), glm::vec3(1, 0, 0)); // rotación
+		model = glm::scale(model, glm::vec3(3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoDH.RenderModel();
+		
+		// brazo izquierdo
+		model = modelaux2;
+		model = glm::translate(model, avatar);
+		model = glm::rotate(model, glm::radians(-armSwing), glm::vec3(1, 0, 0));
+		model = glm::scale(model, glm::vec3(3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		BrazoIH.RenderModel();
 
 		// -- COMPILADO DE OBJETOS SECUNDARIOS DEL PARQUE --
 

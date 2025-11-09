@@ -51,9 +51,8 @@ void Camera::updateVectors()
 void Camera::keyControl(bool* keys, GLfloat deltaTime)
 {
     GLfloat velocityPlayer = tpMoveSpeed * deltaTime; // velocidad del avatar
-    GLfloat velocityAerial = aerialSpeed * deltaTime; // velocidad de la camara a�rea
-
-    // Comportamiento seg�n modo
+    GLfloat velocityAerial = aerialSpeed * deltaTime; // velocidad de la camara aérea
+    // Comportamiento según modo
     if (modeActual == CameraMode::tercera_persona)
     {
         // Movimiento del avatar
@@ -71,8 +70,14 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
             if (glm::length(moveDir) > 0.0f)
             {
                 moveDir = glm::normalize(moveDir);
+                lastMoveDir = moveDir;                   // <-- guardar SOLO cuando hay movimiento
                 *avatarPositionPtr += moveDir * velocityPlayer;
             }
+            else
+            {
+                lastMoveDir = glm::vec3(0.0f);           // <-- sin movimiento
+            }
+
         }
     }
     else if (modeActual == CameraMode::aerea)
@@ -112,22 +117,25 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
     updateVectors();
 }
 
-// Update posici�n/front seg�n modo y avatar pointer
+// Update posición/front según modo y avatar pointer
 void Camera::Update(GLfloat deltaTime)
 {
-    if (modeActual == CameraMode::tercera_persona)
+    switch (modeActual)
     {
+    case CameraMode::tercera_persona:
         applyThirdPersonImmediate();
-    }
-    else if (modeActual == CameraMode::aerea)
-    {
+        break;
+
+    case CameraMode::aerea:
         applyAerial();
-    }
-    else if (modeActual == CameraMode::interes)
-    {
+        break;
+
+    case CameraMode::interes:
         applyPOI();
+        break;
     }
 }
+
 
 glm::mat4 Camera::calculateViewMatrix()
 {
@@ -169,30 +177,7 @@ void Camera::previousPOI()
 }
 
 
-// Tercera persona
-void Camera::applyThirdPersonImmediate()
-{
-    if (avatarPositionPtr == nullptr)
-    {
-        updateVectors();
-        return;
-    }
-
-    glm::vec3 forwardXZ = glm::normalize(glm::vec3(front.x, 0.0f, front.z));
-    if (glm::length(forwardXZ) < 0.001f) forwardXZ = glm::vec3(0.0f, 0.0f, -1.0f);
-
-    glm::vec3 desiredPos = *avatarPositionPtr - forwardXZ * tpDistance + glm::vec3(0.0f, tpHeight, 0.0f);
-
-    position = desiredPos;
-
-    front = glm::normalize(*avatarPositionPtr - position);
-
-    right = glm::normalize(glm::cross(front, worldUp));
-    up = glm::normalize(glm::cross(right, front));
-}
-
-
-// C�mara a�rea
+// Cámara aérea
 void Camera::applyAerial()
 {
     position.y = aerialHeight;
@@ -208,7 +193,7 @@ void Camera::applyAerial()
 }
 
 
-// C�mara puntos de inter�s
+// Cámara puntos de interés
 void Camera::applyPOI()
 {
     if (pointsOfInterest.empty() || currentPOIIndex < 0) return;
@@ -217,10 +202,35 @@ void Camera::applyPOI()
     position = p.camPos;
     front = glm::normalize(p.lookTarget - position);
 
-    // Recalcular yaw y pitch desde front, si tu c�mara los usa
+    // Recalcular yaw y pitch desde front, si tu cámara los usa
     yaw = glm::degrees(atan2(front.z, front.x)) - 90.0f;
     pitch = glm::degrees(asin(front.y));
 
     right = glm::normalize(glm::cross(front, worldUp));
     up = glm::normalize(glm::cross(right, front));
+}
+
+void Camera::applyThirdPersonImmediate()
+{
+    if (!avatarPositionPtr) return;
+
+    // Dirección hacia donde se mueve el avatar
+    // Suponemos que "front" del avatar es +Z o lo que tú definas
+    glm::vec3 avatarPos = *avatarPositionPtr;
+
+    // La cámara estará detrás del avatar alineada con su dirección (front)
+    glm::vec3 target = avatarPos;
+
+    // La cámara se coloca atrás del avatar usando la dirección "front"
+    glm::vec3 desiredCamPos = avatarPos - front * tpDistance + glm::vec3(0.0f, tpHeight, 0.0f);
+
+    // Interpolación suave
+    float smooth = 0.1f; // 0.05 muy suave, 0.2 más rápido
+    position = glm::mix(position, desiredCamPos, smooth);
+
+    // Cámara mira al avatar siempre
+    front = glm::normalize(target - position);
+
+    // Recalcula right y up
+    updateVectors();
 }
