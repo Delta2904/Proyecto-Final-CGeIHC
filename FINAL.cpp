@@ -70,6 +70,18 @@ float movGloboZ = 0.0f;
 bool avanzarX = true;
 bool avanzarZ = true;
 
+// Variables para Kayle
+float movKayle_z = 0.0f;     // Posición principal (eje Z, para ir y volver)
+float movKayle_x = 0.0f;     // Posición secundaria (eje X, para la forma senoidal)
+float orientaKayle = 0.0f;   // Rotación del cuerpo (para el giro)
+float rotAla = 0.0f;         // Rotación de las alas (aleteo)
+float faseKayle = 0.0f;      // Ángulo de control para las funciones seno/coseno
+bool kayleAvanza = true;	 // Control de avance/retroceso
+float limitePositivoZ = 150.0f;   // Límite del mapa para el regreso (el origen)
+float limiteNegativoZ = 100.0f; // Límite del mapa para la ida
+float amplitudSeno = 8.0f;    // Ancho del zig-zag (forma senoidal)
+float frecuenciaSeno = 5.0f;  // Frecuencia del zig-zag
+float frecuenciaAleteo = 8.0f; // Velocidad del aleteo
 
 // Variables para animación del ring
 float ringPosY = -20.0f;          // Posición Y inicial
@@ -130,7 +142,13 @@ Model Arbol;
 Model CuerpoH;
 Model BrazoDH;
 Model BrazoIH;
+<<<<<<< Updated upstream
 Model SpiderMan;
+=======
+Model KayleCuerpo;
+Model KayleAlaDerecha;
+Model KayleAlaIzquierda;
+>>>>>>> Stashed changes
 
 //materiales
 Material Material_brillante;
@@ -477,6 +495,8 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
+	glEnable(GL_DEPTH_TEST);
+
 	Camera camera(glm::vec3(0.0f, 5.0f, 10.0f), glm::vec3(0, 1, 0), -90.0f, 0.0f, 6.0f, 0.1f);
 	glm::vec3 avatar = glm::vec3(0.0f, -2.0f, 170.0f);
 	camera.setAvatarPointer(&avatar);
@@ -539,8 +559,17 @@ int main()
 	BrazoDH.LoadModel("Models/BrazoDH.obj");
 	BrazoIH = Model();
 	BrazoIH.LoadModel("Models/BrazoIH.obj");
+<<<<<<< Updated upstream
 	SpiderMan = Model();
 	SpiderMan.LoadModel("Models/Spider_Man.obj");
+=======
+	KayleCuerpo = Model();
+	KayleCuerpo.LoadModel("Models/cuerpo_kayle.obj");
+	KayleAlaDerecha = Model();
+	KayleAlaDerecha.LoadModel("Models/ala_der.obj");
+	KayleAlaIzquierda = Model();
+	KayleAlaIzquierda.LoadModel("Models/ala_izq.obj");
+>>>>>>> Stashed changes
 
 	// Cargar Skybox de DÍA
 	std::vector<std::string> skyboxFacesDia;
@@ -847,6 +876,42 @@ int main()
 			}
 		}
 
+		// Movimiento de Ida y Vuelta (eje Z) con giros
+		if (kayleAvanza == true) // IDA: Moviéndose hacia -Z
+		{
+			// Sigue avanzando mientras no llegue al límite
+			if (movKayle_z > limiteNegativoZ)
+			{
+				movKayle_z -= 0.1f * deltaTime;
+			}
+			else // Llegó al límite negativo, debe dar la vuelta
+			{
+				kayleAvanza = false;     // Cambia a modo VUELTA
+				orientaKayle = 180.0f;   // Gira 180 grados
+			}
+		}
+		else // VUELTA: Moviéndose hacia +Z (kayleAvanza == false)
+		{
+			// Sigue regresando mientras no llegue al origen
+			if (movKayle_z < limitePositivoZ)
+			{
+				movKayle_z += 0.1f * deltaTime;
+			}
+			else // Llegó al límite positivo (origen), debe dar la vuelta
+			{
+				kayleAvanza = true;      // Cambia a modo IDA
+				orientaKayle = 0.0f;     // Gira de vuelta a 0 grados
+			}
+		}
+
+		// Movimiento Senoidal (Trayectoria ondulada en el eje X)
+		movKayle_x = amplitudSeno * sin(glm::radians(faseKayle * frecuenciaSeno));
+
+		// Aleteo (Movimiento de las alas)
+		rotAla = 15.0f * sin(glm::radians(faseKayle * frecuenciaAleteo));
+
+		// Incremento del contador de fase
+		faseKayle += 0.1f * deltaTime;
 
 		static bool mPressed = false;
 		bool keyM = mainWindow.getsKeys()[GLFW_KEY_M];
@@ -872,6 +937,7 @@ int main()
 			// ES DE NOCHE
 			skyboxNoche.DrawSkybox(camera.calculateViewMatrix(), projection);
 		}
+		glDepthMask(GL_TRUE);
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -1114,11 +1180,46 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		BrazoIH.RenderModel();
 
+<<<<<<< Updated upstream
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(20.0f, -2.0f, 25.0));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		SpiderMan.RenderModel();
+=======
+		// Renderizado de Kayle con animación de vuelo
+
+		// MATRIZ DEL CUERPO (Padre)
+		model = glm::mat4(1.0f);
+		// Aplicamos la posición X (senoidal) y Z (ida/vuelta)
+		model = glm::translate(model, glm::vec3(movKayle_x, 2.0f, movKayle_z));
+		// Aplicamos el giro (0 o 180 grados)
+		model = glm::rotate(model, glm::radians(orientaKayle), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f)); // Ajusta la escala general
+
+		// Dibujar Cuerpo
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		KayleCuerpo.RenderModel();
+
+		// Guardamos la matriz del cuerpo para usarla en las alas
+		glm::mat4 modelKayle = model;
+
+		// MATRIZ DEL ALA DERECHA
+		model = glm::mat4(modelKayle); // La matriz del cuerpo es el origen
+		model = glm::translate(model, glm::vec3(0.0f, 10.0f, 1.0f)); // Posición relativa al cuerpo
+		model = glm::rotate(model, glm::radians(rotAla), glm::vec3(0.0f, 0.0f, 1.0f)); // Aleteo
+		// Dibujar Ala Derecha
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		KayleAlaDerecha.RenderModel();
+
+		// MATRIZ DEL ALA IZQUIERDA
+		model = glm::mat4(modelKayle); // La matriz del cuerpo es el origen
+		model = glm::translate(model, glm::vec3(0.0f, 10.0f, 1.0f)); // Posición relativa al cuerpo
+		model = glm::rotate(model, glm::radians(-rotAla), glm::vec3(0.0f, 0.0f, 1.0f)); // Aleteo (opuesto)
+		// Dibujar Ala Izquierda
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		KayleAlaIzquierda.RenderModel();
+>>>>>>> Stashed changes
 
 		// -- COMPILADO DE OBJETOS SECUNDARIOS DEL PARQUE --
 
