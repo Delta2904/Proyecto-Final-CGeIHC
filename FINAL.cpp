@@ -130,6 +130,7 @@ Model Arbol;
 Model CuerpoH;
 Model BrazoDH;
 Model BrazoIH;
+Model SpiderMan;
 
 //materiales
 Material Material_brillante;
@@ -538,6 +539,8 @@ int main()
 	BrazoDH.LoadModel("Models/BrazoDH.obj");
 	BrazoIH = Model();
 	BrazoIH.LoadModel("Models/BrazoIH.obj");
+	SpiderMan = Model();
+	SpiderMan.LoadModel("Models/Spider_Man.obj");
 
 	// Cargar Skybox de DÍA
 	std::vector<std::string> skyboxFacesDia;
@@ -1110,6 +1113,12 @@ int main()
 		model = glm::scale(model, glm::vec3(3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		BrazoIH.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(20.0f, -2.0f, 25.0));
+		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		SpiderMan.RenderModel();
 
 		// -- COMPILADO DE OBJETOS SECUNDARIOS DEL PARQUE --
 
