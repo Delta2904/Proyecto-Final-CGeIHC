@@ -8,7 +8,7 @@
 !README.md
 
 # No ignorar el main
-!FINAL.cpp
+!FINAL.*
 
 # No ignorar Camera.h y Camera.cpp
 !Camera.*
