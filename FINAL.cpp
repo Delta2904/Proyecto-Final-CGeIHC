@@ -142,13 +142,10 @@ Model Arbol;
 Model CuerpoH;
 Model BrazoDH;
 Model BrazoIH;
-<<<<<<< Updated upstream
 Model SpiderMan;
-=======
 Model KayleCuerpo;
 Model KayleAlaDerecha;
 Model KayleAlaIzquierda;
->>>>>>> Stashed changes
 
 //materiales
 Material Material_brillante;
@@ -559,17 +556,14 @@ int main()
 	BrazoDH.LoadModel("Models/BrazoDH.obj");
 	BrazoIH = Model();
 	BrazoIH.LoadModel("Models/BrazoIH.obj");
-<<<<<<< Updated upstream
 	SpiderMan = Model();
 	SpiderMan.LoadModel("Models/Spider_Man.obj");
-=======
 	KayleCuerpo = Model();
 	KayleCuerpo.LoadModel("Models/cuerpo_kayle.obj");
 	KayleAlaDerecha = Model();
 	KayleAlaDerecha.LoadModel("Models/ala_der.obj");
 	KayleAlaIzquierda = Model();
 	KayleAlaIzquierda.LoadModel("Models/ala_izq.obj");
->>>>>>> Stashed changes
 
 	// Cargar Skybox de DÍA
 	std::vector<std::string> skyboxFacesDia;
@@ -1180,13 +1174,11 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		BrazoIH.RenderModel();
 
-<<<<<<< Updated upstream
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(20.0f, -2.0f, 25.0));
 		model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		SpiderMan.RenderModel();
-=======
 		// Renderizado de Kayle con animación de vuelo
 
 		// MATRIZ DEL CUERPO (Padre)
@@ -1219,7 +1211,6 @@ int main()
 		// Dibujar Ala Izquierda
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		KayleAlaIzquierda.RenderModel();
->>>>>>> Stashed changes
 
 		// -- COMPILADO DE OBJETOS SECUNDARIOS DEL PARQUE --
 
